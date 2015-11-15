@@ -28,7 +28,7 @@ public class NestedEdge extends InnerEdge {
     @Override
     protected void innerRemove() {
         starVertex.removeInnerEdge(this);
-        starVertex.update();
+        starVertex.updateEdges();
     }
 
     @Override

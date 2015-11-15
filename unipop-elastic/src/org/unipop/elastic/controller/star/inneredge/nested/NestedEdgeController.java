@@ -51,7 +51,7 @@ public class NestedEdgeController implements InnerEdgeController {
     public Set<InnerEdge> parseEdges(ElasticStarVertex vertex, Map<String, Object> keyValues) {
         Object nested = keyValues.get(edgeLabel);
         if (nested == null) return SetUtils.emptySet();
-        keyValues.remove(edgeLabel);
+//        keyValues.remove(edgeLabel);
         if (nested instanceof Map) {
             InnerEdge edge = parseEdge(vertex, (Map<String, Object>) nested);
             return Collections.singleton(edge);
@@ -63,9 +63,9 @@ public class NestedEdgeController implements InnerEdgeController {
 
     private InnerEdge parseEdge(ElasticStarVertex vertex, Map<String, Object> keyValues) {
         Object externalVertexId = keyValues.get(externalVertexIdField);
-        keyValues.remove(externalVertexIdField);
+//        keyValues.remove(externalVertexIdField);
         Object edgeId = keyValues.get(edgeIdField);
-        keyValues.remove(edgeIdField);
+//        keyValues.remove(edgeIdField);
         BaseVertex externalVertex = vertex.getGraph().getControllerManager().fromEdge(direction.opposite(), externalVertexId, externalVertexLabel);
         BaseVertex outV = direction.equals(Direction.OUT) ? vertex : externalVertex;
         BaseVertex inV = direction.equals(Direction.IN) ? vertex : externalVertex;
@@ -156,5 +156,10 @@ public class NestedEdgeController implements InnerEdgeController {
 
     public Direction getDirection() {
         return direction;
+    }
+
+    @Override
+    public String getLabel() {
+        return edgeLabel;
     }
 }

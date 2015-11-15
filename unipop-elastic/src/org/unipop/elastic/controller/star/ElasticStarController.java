@@ -44,11 +44,18 @@ public class ElasticStarController extends ElasticVertexController implements Ed
         return new ElasticStarVertex(id, label, null, graph, lazyGetter, this, elasticMutations, getDefaultIndex(), innerEdgeControllers);
     }
 
+    private Map<String,Object> excludeEdges(Map<String,Object> properties){
+        HashMap<String,Object> map = new HashMap<>();
+        map.putAll(properties);
+        innerEdgeControllers.forEach(c -> map.remove(c.getLabel()));
+        return map;
+    }
+
     private ElasticStarVertex createStarVertex(Object id, String label, Map<String, Object> keyValues) {
         ElasticStarVertex vertex = new ElasticStarVertex(id, label, null, graph, null, this, elasticMutations, getDefaultIndex(), innerEdgeControllers);
         if (keyValues != null) {
             innerEdgeControllers.stream().map(controller -> controller.parseEdges(vertex, keyValues)).flatMap(Collection::stream).forEach(vertex::addInnerEdge);
-            keyValues.entrySet().forEach((field) -> vertex.addPropertyLocal(field.getKey(), field.getValue()));
+            excludeEdges(keyValues).entrySet().forEach((field) -> vertex.addPropertyLocal(field.getKey(), field.getValue()));
         }
         return vertex;
     }

@@ -25,4 +25,6 @@ public interface InnerEdgeController {
     void addEdgeFields(List<InnerEdge> edges, Map<String, Object> map);
 
     Direction getDirection();
+
+    String getLabel();
 }

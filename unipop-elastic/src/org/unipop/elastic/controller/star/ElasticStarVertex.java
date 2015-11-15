@@ -1,6 +1,7 @@
 package org.unipop.elastic.controller.star;
 
 import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Property;
 import org.unipop.controller.Predicates;
 import org.unipop.elastic.controller.star.inneredge.InnerEdge;
 import org.unipop.elastic.controller.star.inneredge.InnerEdgeController;
@@ -59,10 +60,25 @@ public class ElasticStarVertex extends ElasticVertex<ElasticStarController> {
         }
     }
 
+    public void updateEdges() {
+        checkLazy();
+        elasticMutations.deleteElement(this, indexName, null);
+        elasticMutations.addElement(this, indexName, null, true);
+    }
+
+    private Map<String,Object> excludeEdges(Map<String,Object> properties){
+        HashMap<String,Object> map = new HashMap<>();
+        map.putAll(properties);
+        innerEdgeControllers.forEach(c -> map.remove(c.getLabel()));
+        return map;
+    }
+
     @Override
     public void applyLazyFields(String label, Map<String, Object> properties) {
-        innerEdgeControllers.stream().map(controller -> controller.parseEdges(this, properties)).flatMap(Collection::stream).forEach(this::addInnerEdge);
-        super.applyLazyFields(label, properties);
+        HashMap<String,Object> map = new HashMap<>();
+        map.putAll(properties);
+        innerEdgeControllers.stream().map(controller -> controller.parseEdges(this, map)).flatMap(Collection::stream).forEach(this::addInnerEdge);
+        super.applyLazyFields(label, excludeEdges(map));
     }
 
     public Set<BaseEdge> getInnerEdges(Predicates predicates) {
