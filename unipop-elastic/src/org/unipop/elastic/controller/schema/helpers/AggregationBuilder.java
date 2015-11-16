@@ -2,7 +2,6 @@ package org.unipop.elastic.controller.schema.helpers;
 
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
-import org.apache.tinkerpop.shaded.kryo.serializers.FieldSerializer;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -14,12 +13,12 @@ import org.elasticsearch.search.aggregations.metrics.max.MaxBuilder;
 import org.elasticsearch.search.aggregations.metrics.min.MinBuilder;
 import org.elasticsearch.search.aggregations.metrics.stats.StatsBuilder;
 import org.elasticsearch.search.aggregations.metrics.valuecount.ValueCountBuilder;
+import org.unipop.elastic.helpers.AggregationHelper;
 
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by Roman on 4/28/2015.
@@ -427,7 +426,7 @@ public class AggregationBuilder implements Cloneable {
         //endregion
 
         //region Abstract Methods
-        protected abstract Object build();
+        public abstract Object build();
         //endregion
 
         //region Protected Methods
@@ -511,14 +510,42 @@ public class AggregationBuilder implements Cloneable {
 
         //region Composite Implementation
         @Override
-        protected Object build() {
+        public Object build() {
             return this.getChildren().stream()
                     .map(child -> (org.elasticsearch.search.aggregations.AggregationBuilder) child.build()).collect(Collectors.toList());
         }
         //endregion
     }
 
-    public class FiltersComposite extends Composite {
+    public abstract class HasAggregationsComposite extends Composite {
+        //region Constructor
+        public HasAggregationsComposite(String name, Op op, Composite parent) {
+            super(name, op, parent);
+        }
+        //endregion
+
+        //region Protected Methods
+        public void applySubAggregationFromChild(org.elasticsearch.search.aggregations.AggregationBuilder aggregationBuilder, AggregationBuilder.Composite childComposite) {
+            Object childAggregation = childComposite.build();
+
+            if (AbstractAggregationBuilder.class.isAssignableFrom(childAggregation.getClass())) {
+                AbstractAggregationBuilder childAggregationBuilder = (AbstractAggregationBuilder) childAggregation;
+                if (childAggregationBuilder != null) {
+                    aggregationBuilder.subAggregation(childAggregationBuilder);
+                }
+            } else if (Iterable.class.isAssignableFrom(childAggregation.getClass())) {
+                Iterable<AbstractAggregationBuilder> childAggregationBuilders = (Iterable<AbstractAggregationBuilder>)childAggregation;
+                for(AbstractAggregationBuilder childAggregationBuilder : childAggregationBuilders) {
+                    if (childAggregationBuilder != null) {
+                        aggregationBuilder.subAggregation(childAggregationBuilder);
+                    }
+                }
+            }
+        }
+        //endregion
+    }
+
+    public class FiltersComposite extends HasAggregationsComposite {
         //region Constructor
         public FiltersComposite(String name, Composite parent) {
             super(name, Op.filters, parent);
@@ -527,7 +554,7 @@ public class AggregationBuilder implements Cloneable {
 
         //region Composite Implementation
         @Override
-        protected Object build() {
+        public Object build() {
             Map<String, FilterBuilder> filterMap = new HashMap<>();
             for (FilterComposite filter : this.getChildren().stream()
                     .filter(child -> FilterComposite.class.isAssignableFrom(child.getClass()))
@@ -547,21 +574,7 @@ public class AggregationBuilder implements Cloneable {
                             !ParamComposite.class.isAssignableFrom(child.getClass()) &&
                             !HavingComposite.class.isAssignableFrom(child.getClass())).collect(Collectors.toList())) {
 
-                Object childAggregation = childComposite.build();
-
-                if (AbstractAggregationBuilder.class.isAssignableFrom(childAggregation.getClass())) {
-                    AbstractAggregationBuilder childAggregationBuilder = (AbstractAggregationBuilder) childComposite.build();
-                    if (childAggregationBuilder != null) {
-                        filtersAggsBuilder.subAggregation((AbstractAggregationBuilder) childComposite.build());
-                    }
-                } else if (Iterable.class.isAssignableFrom(childAggregation.getClass())) {
-                    Iterable<AbstractAggregationBuilder> childAggregationBuilders = (Iterable<AbstractAggregationBuilder>)childAggregation;
-                    for(AbstractAggregationBuilder childAggregationBuilder : childAggregationBuilders) {
-                        if (childAggregationBuilder != null) {
-                            filtersAggsBuilder.subAggregation((AbstractAggregationBuilder) childComposite.build());
-                        }
-                    }
-                }
+                applySubAggregationFromChild(filtersAggsBuilder, childComposite);
             }
 
             return filtersAggsBuilder;
@@ -579,7 +592,7 @@ public class AggregationBuilder implements Cloneable {
 
         //region Composite Implementation
         @Override
-        protected Object build() {
+        public Object build() {
             return AggregationBuilders.filter(this.getName()).
                     filter((FilterBuilder)this.queryBuilder.seekRoot().query().filtered().filter().getCurrent().build());
         }
@@ -598,7 +611,7 @@ public class AggregationBuilder implements Cloneable {
         //endregion
     }
 
-    public class TermsComposite extends Composite {
+    public class TermsComposite extends HasAggregationsComposite {
         //region Constructor
         public TermsComposite(String name, Composite parent) {
             super(name, Op.terms, parent);
@@ -607,7 +620,7 @@ public class AggregationBuilder implements Cloneable {
 
         //region Composite Implementation
         @Override
-        protected Object build() {
+        public Object build() {
             TermsBuilder terms = AggregationBuilders.terms(this.getName());
 
             for (ParamComposite param : this.getChildren().stream()
@@ -640,21 +653,7 @@ public class AggregationBuilder implements Cloneable {
                     .filter(child -> !ParamComposite.class.isAssignableFrom(child.getClass()) &&
                             !HavingComposite.class.isAssignableFrom(child.getClass())).collect(Collectors.toList())) {
 
-                Object childAggregation = childComposite.build();
-
-                if (AbstractAggregationBuilder.class.isAssignableFrom(childAggregation.getClass())) {
-                    AbstractAggregationBuilder childAggregationBuilder = (AbstractAggregationBuilder) childComposite.build();
-                    if (childAggregationBuilder != null) {
-                        terms.subAggregation((AbstractAggregationBuilder) childComposite.build());
-                    }
-                } else if (Iterable.class.isAssignableFrom(childAggregation.getClass())) {
-                    Iterable<AbstractAggregationBuilder> childAggregationBuilders = (Iterable<AbstractAggregationBuilder>)childAggregation;
-                    for(AbstractAggregationBuilder childAggregationBuilder : childAggregationBuilders) {
-                        if (childAggregationBuilder != null) {
-                            terms.subAggregation((AbstractAggregationBuilder) childComposite.build());
-                        }
-                    }
-                }
+                applySubAggregationFromChild(terms, childComposite);
             }
 
             return terms;
@@ -671,7 +670,7 @@ public class AggregationBuilder implements Cloneable {
 
         //region Composite Implementation
         @Override
-        protected Object build() {
+        public Object build() {
             String countField = null;
             for (ParamComposite param : this.getChildren().stream()
                     .filter(child -> ParamComposite.class.isAssignableFrom(child.getClass()))
@@ -703,7 +702,7 @@ public class AggregationBuilder implements Cloneable {
 
         //region Composite Implementation
         @Override
-        protected Object build() {
+        public Object build() {
             MinBuilder min = AggregationBuilders.min(this.getName());
 
             for (ParamComposite param : this.getChildren().stream()
@@ -729,7 +728,7 @@ public class AggregationBuilder implements Cloneable {
 
         //region Composite Implementation
         @Override
-        protected Object build() {
+        public Object build() {
             MaxBuilder max = AggregationBuilders.max(this.getName());
 
             for (ParamComposite param : this.getChildren().stream()
@@ -755,7 +754,7 @@ public class AggregationBuilder implements Cloneable {
 
         //region Composite Implementation
         @Override
-        protected Object build() {
+        public Object build() {
             StatsBuilder stats = AggregationBuilders.stats(this.getName());
 
             for (ParamComposite param : this.getChildren().stream()
@@ -781,7 +780,7 @@ public class AggregationBuilder implements Cloneable {
 
         //region Composite Implementation
         @Override
-        protected Object build() {
+        public Object build() {
             CardinalityBuilder cardinality = AggregationBuilders.cardinality(this.getName());
 
             for (ParamComposite param : this.getChildren().stream()
@@ -817,7 +816,7 @@ public class AggregationBuilder implements Cloneable {
 
         //region Composite Implementation
         @Override
-        protected Object build() {
+        public Object build() {
             return null;
         }
         //endregion
@@ -847,7 +846,7 @@ public class AggregationBuilder implements Cloneable {
 
         //region Composite Implementation
         @Override
-        protected Object build() {
+        public Object build() {
             return null;
         }
         //endregion
@@ -873,7 +872,7 @@ public class AggregationBuilder implements Cloneable {
 
         //region Composite Implementation
         @Override
-        protected Object build() {
+        public Object build() {
             return innerAggregationBuilder.getAggregations();
         }
 
