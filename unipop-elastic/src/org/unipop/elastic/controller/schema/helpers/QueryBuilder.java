@@ -414,6 +414,44 @@ public class QueryBuilder implements Cloneable{
         return this;
     }
 
+    public QueryBuilder drop() {
+        if (this.root == null) {
+            return this;
+        }
+
+        if (this.root == this.current) {
+            this.root = null;
+            this.current = null;
+            return this;
+        }
+
+        Composite newCurrent = this.current.getParent();
+        this.current.drop();
+        this.current = newCurrent;
+
+        return this;
+    }
+
+    public QueryBuilder prune() {
+        Composite pruneComposite = null;
+        final List<Op> opPruneCandidates = Arrays.asList(Op.bool, Op.must, Op.mustNot, Op.should);
+        do {
+            pruneComposite = this.root.seek((composite) -> {
+                return opPruneCandidates.contains(composite.getOp()) && (composite.getChildren() == null || composite.getChildren().size() == 0);
+
+            }, SeekMode.full);
+
+            if (this.current == pruneComposite) {
+                this.drop();
+            } else {
+                pruneComposite.drop();
+            }
+
+        } while(pruneComposite != null);
+
+        return this;
+    }
+
     public QueryBuilder expand(Map<String, Object> expandValues) {
         this.root.expand(expandValues);
         return this;
@@ -582,6 +620,15 @@ public class QueryBuilder implements Cloneable{
 
         protected void clear() {
             this.getChildren().clear();
+        }
+
+        protected void drop() {
+            if (this.getParent() == null) {
+                return;
+            }
+
+            this.getParent().getChildren().remove(this);
+            this.parent = null;
         }
 
         @Override

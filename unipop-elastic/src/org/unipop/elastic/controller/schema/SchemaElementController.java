@@ -93,7 +93,10 @@ public abstract class SchemaElementController {
 
     protected void translateHasContainers(SearchBuilder searchBuilder, ArrayList<HasContainer> hasContainers) {
         HasContainersTranslator hasContainersTranslator = new HasContainersTranslator();
-        hasContainersTranslator.updateSearchBuilder(searchBuilder, hasContainers);
+        for (HasContainer hasContainer : hasContainers) {
+            searchBuilder.getQueryBuilder().seekRoot().query().filtered().filter().bool();
+            hasContainersTranslator.applyHasContainer(searchBuilder, searchBuilder.getQueryBuilder(), hasContainer);
+        }
     }
 
     protected Iterable<SearchHit> getSearchHits(SearchBuilder searchBuilder) {
