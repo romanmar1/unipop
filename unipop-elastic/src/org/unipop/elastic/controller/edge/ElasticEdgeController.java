@@ -4,7 +4,6 @@ import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.structure.*;
-import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -14,12 +13,9 @@ import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.javatuples.Pair;
-import org.unipop.controller.Predicates;
-import org.unipop.controller.aggregation.SemanticKeyTraversal;
-import org.unipop.controller.aggregation.SemanticReducerTraversal;
+import org.unipop.elastic.controller.Predicates;
 import org.unipop.elastic.controller.schema.helpers.AggregationBuilder;
 import org.unipop.elastic.controller.schema.helpers.SearchAggregationIterable;
-import org.unipop.elastic.controller.schema.helpers.SearchBuilder;
 import org.unipop.elastic.controller.schema.helpers.aggregationConverters.*;
 import org.unipop.elastic.helpers.*;
 import org.unipop.structure.BaseEdge;
@@ -31,7 +27,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class ElasticEdgeController implements org.unipop.controller.EdgeController {
+public class ElasticEdgeController implements org.unipop.elastic.controller.EdgeController {
     private UniGraph graph;
     private final Client client;
     private final ElasticMutations elasticMutations;

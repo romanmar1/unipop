@@ -2,8 +2,8 @@ package org.unipop.elastic.controller.schema;
 
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.structure.*;
-import org.unipop.controller.EdgeController;
-import org.unipop.controller.Predicates;
+import org.unipop.elastic.controller.EdgeController;
+import org.unipop.elastic.controller.Predicates;
 import org.unipop.elastic.controller.schema.helpers.*;
 import org.unipop.elastic.controller.schema.helpers.aggregationConverters.*;
 import org.unipop.elastic.controller.schema.helpers.elementConverters.ElementConverter;

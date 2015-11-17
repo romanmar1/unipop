@@ -1,8 +1,8 @@
-package org.unipop.extensions.controller.promise;
+package org.unipop.elastic.controller.promise;
 
 import org.apache.tinkerpop.gremlin.structure.Property;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.unipop.controller.EdgeController;
+import org.unipop.elastic.controller.EdgeController;
 import org.unipop.structure.BaseEdge;
 import org.unipop.structure.BaseProperty;
 import org.unipop.structure.UniGraph;
@@ -14,8 +14,8 @@ import java.util.Map;
  */
 public class PromiseEdge extends BaseEdge {
     //region Constructor
-    public PromiseEdge(Object id, String label, Map<String, Object> keyValues, Vertex outV, Vertex inV, EdgeController controller, UniGraph graph) {
-        super(id, label, keyValues, outV, inV, controller, graph);
+    public PromiseEdge(Object id, Vertex outV, Vertex inV, UniGraph graph) {
+        super(id, "promise", null, outV, inV, null, graph);
     }
     //endregion
 

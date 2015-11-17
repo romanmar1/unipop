@@ -1,44 +1,35 @@
-package org.unipop.elastic;
+package org.unipop.elastic.promise;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.io.FileUtils;
 import org.apache.tinkerpop.gremlin.AbstractGraphProvider;
 import org.apache.tinkerpop.gremlin.LoadGraphWith;
-import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.node.Node;
 import org.unipop.controllerprovider.ControllerManagerFactory;
-import org.unipop.elastic.controllermanagers.BasicElasticControllerManager;
 import org.unipop.elastic.helpers.ElasticClientFactory;
 import org.unipop.elastic.helpers.ElasticHelper;
-import org.unipop.process.strategy.DefaultStrategyRegistrar;
-import org.unipop.structure.*;
+import org.unipop.elastic.controller.promise.PromiseControllerManager;
+import org.unipop.process.strategy.BasicStrategyRegistrar;
+import org.unipop.structure.UniGraph;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-public class ElasticGraphProvider extends AbstractGraphProvider {
-
+/**
+ * Created by Roman on 11/17/2015.
+ */
+@SuppressWarnings("Duplicates")
+public class PromiseGraphProvider extends AbstractGraphProvider {
     private static String CLUSTER_NAME = "test";
-
-    private static final Set<Class> IMPLEMENTATION = new HashSet<Class>() {{
-        add(BaseEdge.class);
-        add(BaseElement.class);
-        add(UniGraph.class);
-        add(BaseProperty.class);
-        add(BaseVertex.class);
-        add(BaseVertexProperty.class);
-    }};
-
     private final Client client;
 
-    public ElasticGraphProvider() throws IOException, ExecutionException, InterruptedException {
+    public PromiseGraphProvider() throws IOException, ExecutionException, InterruptedException {
         //patch for failing IO tests that wrute to disk
         System.setProperty("build.dir", System.getProperty("user.dir") + "\\build");
         //Delete elasticsearch 'data' directory
@@ -59,11 +50,8 @@ public class ElasticGraphProvider extends AbstractGraphProvider {
             put("elasticsearch.cluster.name", CLUSTER_NAME);
             put("elasticsearch.cluster.address", "127.0.0.1:" + client.settings().get("transport.tcp.port"));
 
-            //put("controllerManager", ModernGraphControllerManager.class.getName());
-            //put("controllerManager", ElasticStarControllerManager.class.getName());
-            //put("controllerManager", BasicElasticControllerManager.class.getName());
-            put("controllerManagerFactory", (ControllerManagerFactory)() -> new BasicElasticControllerManager());
-            put("strategyRegistrar", new DefaultStrategyRegistrar());
+            put("controllerManagerFactory", (ControllerManagerFactory)() -> new PromiseControllerManager());
+            put("strategyRegistrar", new BasicStrategyRegistrar());
         }};
     }
 
@@ -78,15 +66,6 @@ public class ElasticGraphProvider extends AbstractGraphProvider {
 
     @Override
     public Set<Class> getImplementations() {
-        return IMPLEMENTATION;
-    }
-
-    @Override
-    public Object convertId(Object id, Class<? extends Element> c) {
-        return id.toString();
-    }
-
-    public Client getClient() {
-        return client;
+        return null;
     }
 }

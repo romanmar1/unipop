@@ -1,19 +1,24 @@
-package org.unipop.extensions.controller.promise;
+package org.unipop.elastic.controller.promise;
 
 import org.apache.tinkerpop.gremlin.structure.Property;
 import org.unipop.structure.BaseVertex;
 import org.unipop.structure.BaseVertexProperty;
 import org.unipop.structure.UniGraph;
 
-import java.util.Map;
-
 /**
  * Created by Roman on 11/16/2015.
  */
 public class PromiseVertex extends BaseVertex<PromiseVertexController> {
     //region Constructor
-    protected PromiseVertex(Object id, String label, Map<String, Object> keyValues, PromiseVertexController controller, UniGraph graph) {
-        super(id, label, keyValues, controller, graph);
+    public PromiseVertex(Promise promise, UniGraph graph) {
+        super(promise.getId(), "promise", null, null, graph);
+
+    }
+    //endregion
+
+    //region getters & setters
+    public Promise getPromise() {
+        return promise;
     }
     //endregion
 
@@ -32,5 +37,9 @@ public class PromiseVertex extends BaseVertex<PromiseVertexController> {
     protected void innerRemove() {
 
     }
+    //endregion
+
+    //region fields
+    private Promise promise;
     //endregion
 }

@@ -2,8 +2,8 @@ package org.unipop.elastic.controller.schema;
 
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.structure.*;
-import org.unipop.controller.Predicates;
-import org.unipop.controller.VertexController;
+import org.unipop.elastic.controller.Predicates;
+import org.unipop.elastic.controller.VertexController;
 import org.unipop.elastic.controller.schema.helpers.ElasticGraphConfiguration;
 import org.unipop.elastic.controller.schema.helpers.LazyGetterFactory;
 import org.unipop.elastic.controller.schema.helpers.SearchAggregationIterable;

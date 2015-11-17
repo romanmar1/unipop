@@ -11,7 +11,7 @@ import org.apache.tinkerpop.gremlin.structure.*;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.structure.util.StringFactory;
 import org.apache.tinkerpop.gremlin.util.iterator.ArrayIterator;
-import org.unipop.controller.Predicates;
+import org.unipop.elastic.controller.Predicates;
 import org.unipop.controllerprovider.ControllerManager;
 import org.unipop.controllerprovider.ControllerManagerFactory;
 import org.unipop.process.strategy.DefaultStrategyRegistrar;
@@ -62,6 +62,7 @@ import java.util.Map;
 @Graph.OptIn(Graph.OptIn.SUITE_STRUCTURE_STANDARD)
 @Graph.OptIn(Graph.OptIn.SUITE_PROCESS_STANDARD)
 @Graph.OptIn("org.unipop.elastic.schema.misc.CustomTestSuite")
+@Graph.OptIn("org.unipop.elastic.suite.CustomTestSuite")
 public class UniGraph implements Graph {
     //for testSuite
     public static UniGraph open(final Configuration configuration) throws InstantiationException {

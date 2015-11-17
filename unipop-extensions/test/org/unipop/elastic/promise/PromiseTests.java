@@ -1,12 +1,11 @@
-package org.unipop.promise.test;
+package org.unipop.elastic.promise;
 
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
-import org.junit.Assert;
 import org.junit.Test;
 import org.unipop.elastic.controller.schema.helpers.SearchBuilder;
-import org.unipop.extensions.controller.promise.Promise;
+import org.unipop.elastic.controller.schema.helpers.TraversalQueryTranslator;
 
 /**
  * Created by Roman on 11/16/2015.
@@ -16,9 +15,9 @@ public class PromiseTests {
     public void simplePromiseTraversalToSearchBuilder() {
         Traversal traversal = __.or(__.has("prop1", "val1"), __.and(__.has("prop2", P.gt(2)), __.has("prop3", "val3")), __.has("prop4", "val4"));
 
+        TraversalQueryTranslator traversalQueryTranslator = new TraversalQueryTranslator();
         SearchBuilder searchBuilder = new SearchBuilder();
-        Promise promise = new Promise(traversal);
-        promise.addToQuery(searchBuilder, searchBuilder.getQueryBuilder());
+        traversalQueryTranslator.applyTraversal(searchBuilder, searchBuilder.getQueryBuilder().query().filtered().filter(), traversal);
 
         String query = searchBuilder.getQueryBuilder().getQuery().toString();
         int x = 5;
@@ -28,9 +27,9 @@ public class PromiseTests {
     public void promiseTraversalToSearchBuilderWithTraversalFilterStep() {
         Traversal traversal = __.or(__.has("prop1", "val1"), __.and(__.has("prop2", P.gt(2)), __.has("someProperty")));
 
+        TraversalQueryTranslator traversalQueryTranslator = new TraversalQueryTranslator();
         SearchBuilder searchBuilder = new SearchBuilder();
-        Promise promise = new Promise(traversal);
-        promise.addToQuery(searchBuilder, searchBuilder.getQueryBuilder());
+        traversalQueryTranslator.applyTraversal(searchBuilder, searchBuilder.getQueryBuilder().query().filtered().filter(), traversal);
 
         String query = searchBuilder.getQueryBuilder().getQuery().toString();
         int x = 5;
@@ -40,9 +39,9 @@ public class PromiseTests {
     public void promiseTraversalToSearchBuilderWithNotStep() {
         Traversal traversal = __.or(__.has("prop1", "val1"), __.and(__.has("prop2", P.gt(2)), __.not(__.has("someProperty"))));
 
+        TraversalQueryTranslator traversalQueryTranslator = new TraversalQueryTranslator();
         SearchBuilder searchBuilder = new SearchBuilder();
-        Promise promise = new Promise(traversal);
-        promise.addToQuery(searchBuilder, searchBuilder.getQueryBuilder());
+        traversalQueryTranslator.applyTraversal(searchBuilder, searchBuilder.getQueryBuilder().query().filtered().filter(), traversal);
 
         String query = searchBuilder.getQueryBuilder().getQuery().toString();
         int x = 5;

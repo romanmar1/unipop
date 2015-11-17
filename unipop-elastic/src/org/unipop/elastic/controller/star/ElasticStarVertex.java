@@ -1,7 +1,7 @@
 package org.unipop.elastic.controller.star;
 
 import org.apache.tinkerpop.gremlin.structure.Direction;
-import org.unipop.controller.Predicates;
+import org.unipop.elastic.controller.Predicates;
 import org.unipop.elastic.controller.star.inneredge.InnerEdge;
 import org.unipop.elastic.controller.star.inneredge.InnerEdgeController;
 import org.unipop.elastic.controller.vertex.ElasticVertex;

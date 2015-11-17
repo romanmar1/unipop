@@ -1,11 +1,12 @@
-package org.unipop.extensions.controller.promise;
+package org.unipop.elastic.controller.promise;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.elasticsearch.client.Client;
-import org.unipop.controller.EdgeController;
-import org.unipop.controller.VertexController;
+import org.unipop.elastic.controller.EdgeController;
+import org.unipop.elastic.controller.VertexController;
 import org.unipop.controllerprovider.BasicControllerManager;
+import org.unipop.elastic.controller.promise.helpers.elementConverters.PromiseEdgeConverter;
 import org.unipop.elastic.controller.schema.SchemaEdgeController;
 import org.unipop.elastic.controller.schema.SchemaVertexController;
 import org.unipop.elastic.controller.schema.helpers.ElasticGraphConfiguration;
@@ -20,9 +21,9 @@ import org.unipop.elastic.controller.schema.helpers.schemaProviders.DefaultGraph
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProviderFactory;
 import org.unipop.elastic.helpers.ElasticClientFactory;
-import org.unipop.elastic.helpers.ElasticHelper;
 import org.unipop.elastic.helpers.ElasticMutations;
 import org.unipop.elastic.helpers.TimingAccessor;
+import org.unipop.elastic.controller.promise.helpers.elementConverters.PromiseVertexConverter;
 import org.unipop.structure.UniGraph;
 
 import java.util.Arrays;
@@ -62,10 +63,33 @@ public class PromiseControllerManager extends BasicControllerManager {
         }
 
         client = ElasticClientFactory.create(elasticConfiguration);
+        ElasticMutations elasticMutations = new ElasticMutations(false, client, new TimingAccessor());
+        LazyGetterFactory lazyGetterFactory = new LazyGetterFactory(client, schemaProvider);
 
-        this.vertexController = new PromiseVertexController();
+        this.vertexController = new PromiseVertexController(
+                graph,
+                new SchemaVertexController(
+                        graph,
+                        schemaProvider,
+                        client,
+                        elasticMutations,
+                        elasticConfiguration,
+                        new VertexConverter(graph, schemaProvider, elasticMutations, lazyGetterFactory)),
+                new PromiseVertexConverter(graph));
 
-        this.edgeController = new PromiseEdgeController();
+        this.edgeController = new PromiseEdgeController(
+                graph,
+                new SchemaEdgeController(
+                        graph,
+                        schemaProvider,
+                        client,
+                        elasticMutations,
+                        elasticConfiguration,
+                        new CompositeElementConverter(
+                                CompositeElementConverter.Mode.First,
+                                new SingularEdgeConverter(graph, schemaProvider, elasticMutations, lazyGetterFactory),
+                                new DualEdgeConverter(graph, schemaProvider, elasticMutations, lazyGetterFactory))),
+                new PromiseEdgeConverter(graph));
     }
 
     @Override

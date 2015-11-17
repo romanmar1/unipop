@@ -1,9 +1,9 @@
-package org.unipop.controller.virtualvertex;
+package org.unipop.elastic.controller.virtualvertex;
 
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.structure.Direction;
-import org.unipop.controller.Predicates;
-import org.unipop.controller.VertexController;
+import org.unipop.elastic.controller.Predicates;
+import org.unipop.elastic.controller.VertexController;
 import org.unipop.structure.BaseVertex;
 import org.unipop.structure.UniGraph;
 

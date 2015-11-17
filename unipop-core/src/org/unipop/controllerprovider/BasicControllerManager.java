@@ -3,9 +3,9 @@ package org.unipop.controllerprovider;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.unipop.controller.EdgeController;
-import org.unipop.controller.Predicates;
-import org.unipop.controller.VertexController;
+import org.unipop.elastic.controller.EdgeController;
+import org.unipop.elastic.controller.Predicates;
+import org.unipop.elastic.controller.VertexController;
 import org.unipop.structure.BaseEdge;
 import org.unipop.structure.BaseVertex;
 

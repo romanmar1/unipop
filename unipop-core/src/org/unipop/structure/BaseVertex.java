@@ -3,7 +3,7 @@ package org.unipop.structure;
 import org.apache.tinkerpop.gremlin.structure.*;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.structure.util.StringFactory;
-import org.unipop.controller.VertexController;
+import org.unipop.elastic.controller.VertexController;
 
 import java.util.Iterator;
 import java.util.Map;

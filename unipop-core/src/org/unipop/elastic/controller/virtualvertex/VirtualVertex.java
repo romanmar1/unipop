@@ -1,4 +1,4 @@
-package org.unipop.controller.virtualvertex;
+package org.unipop.elastic.controller.virtualvertex;
 
 import org.unipop.structure.BaseVertex;
 import org.unipop.structure.BaseVertexProperty;

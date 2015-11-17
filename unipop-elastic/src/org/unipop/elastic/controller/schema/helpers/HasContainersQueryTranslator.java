@@ -4,7 +4,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.Compare;
 import org.apache.tinkerpop.gremlin.process.traversal.Contains;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.structure.Graph;
-import org.unipop.controller.ExistsP;
+import org.unipop.elastic.controller.ExistsP;
 
 import java.util.Arrays;
 import java.util.stream.StreamSupport;
@@ -12,7 +12,7 @@ import java.util.stream.StreamSupport;
 /**
  * Created by Gilad on 13/10/2015.
  */
-public class HasContainersTranslator {
+public class HasContainersQueryTranslator {
     public void applyHasContainer(SearchBuilder searchBuilder, QueryBuilder queryBuilder, HasContainer hasContainer) {
         if (Graph.Hidden.isHidden(hasContainer.getKey())) {
             applyHiddenHasContainer(searchBuilder, queryBuilder, hasContainer);

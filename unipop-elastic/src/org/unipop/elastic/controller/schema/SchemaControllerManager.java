@@ -1,19 +1,11 @@
 package org.unipop.elastic.controller.schema;
 
 import org.apache.commons.configuration.Configuration;
-import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
-import org.apache.tinkerpop.gremlin.process.traversal.util.MutableMetrics;
-import org.apache.tinkerpop.gremlin.structure.Direction;
-import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.client.Client;
-import org.unipop.controller.EdgeController;
-import org.unipop.controller.Predicates;
-import org.unipop.controller.VertexController;
+import org.unipop.elastic.controller.EdgeController;
+import org.unipop.elastic.controller.VertexController;
 import org.unipop.controllerprovider.BasicControllerManager;
-import org.unipop.controllerprovider.ControllerManager;
 import org.unipop.elastic.controller.schema.helpers.ElasticGraphConfiguration;
 import org.unipop.elastic.controller.schema.helpers.LazyGetterFactory;
 import org.unipop.elastic.controller.schema.helpers.ReflectionHelper;
@@ -29,14 +21,10 @@ import org.unipop.elastic.helpers.ElasticClientFactory;
 import org.unipop.elastic.helpers.ElasticHelper;
 import org.unipop.elastic.helpers.ElasticMutations;
 import org.unipop.elastic.helpers.TimingAccessor;
-import org.unipop.structure.BaseEdge;
-import org.unipop.structure.BaseVertex;
 import org.unipop.structure.UniGraph;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**

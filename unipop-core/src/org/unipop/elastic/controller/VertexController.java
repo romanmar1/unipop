@@ -1,4 +1,4 @@
-package org.unipop.controller;
+package org.unipop.elastic.controller;
 
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.structure.*;

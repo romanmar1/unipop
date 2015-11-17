@@ -1,4 +1,4 @@
-package org.unipop.controller;
+package org.unipop.elastic.controller;
 
 
 /**

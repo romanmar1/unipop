@@ -3,7 +3,7 @@ package org.unipop.elastic.controller.schema;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.structure.Element;
-import org.unipop.controller.Predicates;
+import org.unipop.elastic.controller.Predicates;
 import org.unipop.elastic.controller.schema.helpers.*;
 import org.unipop.elastic.controller.schema.helpers.elementConverters.ElementConverter;
 import org.unipop.elastic.controller.schema.helpers.elementConverters.utils.ElementFactory;
@@ -92,10 +92,10 @@ public abstract class SchemaElementController {
     }
 
     protected void translateHasContainers(SearchBuilder searchBuilder, ArrayList<HasContainer> hasContainers) {
-        HasContainersTranslator hasContainersTranslator = new HasContainersTranslator();
+        HasContainersQueryTranslator hasContainersQueryTranslator = new HasContainersQueryTranslator();
         for (HasContainer hasContainer : hasContainers) {
             searchBuilder.getQueryBuilder().seekRoot().query().filtered().filter().bool();
-            hasContainersTranslator.applyHasContainer(searchBuilder, searchBuilder.getQueryBuilder(), hasContainer);
+            hasContainersQueryTranslator.applyHasContainer(searchBuilder, searchBuilder.getQueryBuilder(), hasContainer);
         }
     }
 

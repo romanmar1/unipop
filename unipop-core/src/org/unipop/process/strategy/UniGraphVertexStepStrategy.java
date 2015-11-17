@@ -6,7 +6,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.step.map.VertexStep;
 import org.apache.tinkerpop.gremlin.process.traversal.strategy.AbstractTraversalStrategy;
 import org.apache.tinkerpop.gremlin.process.traversal.util.TraversalHelper;
 import org.apache.tinkerpop.gremlin.structure.Graph;
-import org.unipop.controller.Predicates;
+import org.unipop.elastic.controller.Predicates;
 import org.unipop.process.UniGraphVertexStep;
 import org.unipop.structure.UniGraph;
 

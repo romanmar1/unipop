@@ -9,7 +9,7 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.unipop.controller.Predicates;
+import org.unipop.elastic.controller.Predicates;
 import org.unipop.elastic.controller.star.ElasticStarVertex;
 import org.unipop.elastic.controller.star.inneredge.InnerEdge;
 import org.unipop.elastic.controller.star.inneredge.InnerEdgeController;

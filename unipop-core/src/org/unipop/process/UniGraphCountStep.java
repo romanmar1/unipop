@@ -6,12 +6,10 @@ import org.apache.tinkerpop.gremlin.process.traversal.step.util.ReducingBarrierS
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.unipop.controller.Predicates;
+import org.unipop.elastic.controller.Predicates;
 import org.unipop.controllerprovider.ControllerManager;
 
 import java.util.*;
-import java.util.stream.Collector;
-import java.util.stream.StreamSupport;
 
 /**
  * Created by Gilad on 02/11/2015.

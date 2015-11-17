@@ -4,7 +4,7 @@ import org.apache.commons.collections4.IteratorUtils;
 import org.apache.tinkerpop.gremlin.structure.*;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.structure.util.StringFactory;
-import org.unipop.controller.EdgeController;
+import org.unipop.elastic.controller.EdgeController;
 
 import java.util.Arrays;
 import java.util.Iterator;

@@ -2,7 +2,7 @@ package org.unipop.elastic.controller.schema;
 
 import org.apache.tinkerpop.gremlin.structure.Property;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.unipop.controller.EdgeController;
+import org.unipop.elastic.controller.EdgeController;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphEdgeSchema;
 import org.unipop.elastic.helpers.ElasticMutations;
 import org.unipop.structure.BaseEdge;

@@ -1,4 +1,4 @@
-package org.unipop.controller.aggregation;
+package org.unipop.elastic.controller.aggregation;
 
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.util.FastNoSuchElementException;
@@ -6,13 +6,13 @@ import org.apache.tinkerpop.gremlin.process.traversal.util.FastNoSuchElementExce
 /**
  * Created by Gilad on 02/11/2015.
  */
-public class SemanticKeyTraversal implements Traversal {
+public class SemanticValuesTraversal implements Traversal {
     public enum Type {
         property
     }
 
     //region Constructor
-    public SemanticKeyTraversal(SemanticKeyTraversal.Type type, String key) {
+    public SemanticValuesTraversal(SemanticValuesTraversal.Type type, String key) {
         this.type = type;
         this.key = key;
     }
@@ -35,13 +35,13 @@ public class SemanticKeyTraversal implements Traversal {
         return this.key;
     }
 
-    public SemanticKeyTraversal.Type getType() {
+    public SemanticValuesTraversal.Type getType() {
         return this.type;
     }
     //endregion
 
     //region Fields
     private String key;
-    private SemanticKeyTraversal.Type type;
+    private SemanticValuesTraversal.Type type;
     //endregion
 }

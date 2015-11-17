@@ -12,8 +12,8 @@ import org.apache.tinkerpop.gremlin.process.traversal.strategy.AbstractTraversal
 import org.apache.tinkerpop.gremlin.process.traversal.util.TraversalHelper;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.unipop.controller.ExistsP;
-import org.unipop.controller.Predicates;
+import org.unipop.elastic.controller.ExistsP;
+import org.unipop.elastic.controller.Predicates;
 import org.unipop.process.UniGraphStartStep;
 import org.unipop.process.UniGraphVertexStep;
 import org.unipop.structure.UniGraph;

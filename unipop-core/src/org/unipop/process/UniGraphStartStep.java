@@ -1,6 +1,6 @@
 package org.unipop.process;
 
-import org.unipop.controller.Predicates;
+import org.unipop.elastic.controller.Predicates;
 import org.apache.tinkerpop.gremlin.process.traversal.step.sideEffect.GraphStep;
 import org.apache.tinkerpop.gremlin.process.traversal.util.MutableMetrics;
 import org.apache.tinkerpop.gremlin.process.traversal.util.StandardTraversalMetrics;

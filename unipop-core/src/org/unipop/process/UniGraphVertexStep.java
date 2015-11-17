@@ -1,6 +1,6 @@
 package org.unipop.process;
 
-import org.unipop.controller.Predicates;
+import org.unipop.elastic.controller.Predicates;
 import org.apache.tinkerpop.gremlin.process.traversal.*;
 import org.apache.tinkerpop.gremlin.process.traversal.step.map.VertexStep;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.*;

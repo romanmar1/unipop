@@ -4,7 +4,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.elasticsearch.index.query.FilterBuilder;
-import org.unipop.controller.Predicates;
+import org.unipop.elastic.controller.Predicates;
 import org.unipop.elastic.controller.star.ElasticStarVertex;
 import org.unipop.structure.BaseVertex;
 
