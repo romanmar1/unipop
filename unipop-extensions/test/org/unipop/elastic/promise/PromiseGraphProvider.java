@@ -8,6 +8,8 @@ import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.node.Node;
 import org.unipop.controllerprovider.ControllerManagerFactory;
+import org.unipop.elastic.controller.schema.SchemaControllerManager;
+import org.unipop.elastic.controller.schema.helpers.ElasticGraphConfiguration;
 import org.unipop.elastic.helpers.ElasticClientFactory;
 import org.unipop.elastic.helpers.ElasticHelper;
 import org.unipop.elastic.controller.promise.PromiseControllerManager;
@@ -49,10 +51,26 @@ public class PromiseGraphProvider extends AbstractGraphProvider {
             put("elasticsearch.client", ElasticClientFactory.ClientType.TRANSPORT_CLIENT);
             put("elasticsearch.cluster.name", CLUSTER_NAME);
             put("elasticsearch.cluster.address", "127.0.0.1:" + client.settings().get("transport.tcp.port"));
-
-            put("controllerManagerFactory", (ControllerManagerFactory)() -> new PromiseControllerManager());
-            put("strategyRegistrar", new BasicStrategyRegistrar());
         }};
+    }
+
+    @Override
+    public Configuration newGraphConfiguration(String graphName, Class<?> test, String testMethodName, Map<String, Object> configurationOverrides, LoadGraphWith.GraphData loadGraphWith) {
+        Configuration configuration = super.newGraphConfiguration(graphName, test, testMethodName, configurationOverrides, loadGraphWith);
+        configuration.setProperty("controllerManagerFactory", (ControllerManagerFactory)() -> new PromiseControllerManager());
+        configuration.setProperty("strategyRegistrar", new BasicStrategyRegistrar());
+
+        ElasticGraphConfiguration elasticConfiguration = new ElasticGraphConfiguration(configuration);
+        elasticConfiguration.setElasticGraphSchemaProviderFactory(() -> new ModernGraphElementSchemaProvider(graphName.toLowerCase()));
+        elasticConfiguration.setElasticGraphDefaultSearchSize(10000);
+        elasticConfiguration.setElasticGraphScrollSize(1000);
+        elasticConfiguration.setElasticGraphAggregationsDefaultTermsSize(100000);
+        elasticConfiguration.setElasticGraphAggregationsDefaultTermsShardSize(100000);
+        elasticConfiguration.setElasticGraphAggregationsDefaultTermsExecutonHint("global_ordinals_hash");
+        //elasticConfiguration.setClusterAddress("some-server:9300");
+        //elasticConfiguration.setClusterName("some.remote.cluster");
+
+        return elasticConfiguration;
     }
 
     @Override

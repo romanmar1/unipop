@@ -4,6 +4,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.unipop.elastic.controller.promise.IdPromise;
 import org.unipop.elastic.controller.promise.Promise;
 import org.unipop.elastic.controller.promise.PromiseEdge;
 import org.unipop.elastic.controller.promise.PromiseVertex;
@@ -36,8 +37,8 @@ public class PromiseEdgeConverter implements ElementConverter<Element, Element> 
         return Arrays.asList(
                 new PromiseEdge(
                         element.id(),
-                        new PromiseVertex(new Promise(outVertex.id(), GraphTraversalSource.standard().create(this.graph).V(outVertex.id())), this.graph),
-                        new PromiseVertex(new Promise(inVertex.id(), GraphTraversalSource.standard().create(this.graph).V(inVertex.id())), this.graph),
+                        new PromiseVertex(new IdPromise(outVertex.id()), this.graph),
+                        new PromiseVertex(new IdPromise(inVertex.id()), this.graph),
                         this.graph));
     }
 

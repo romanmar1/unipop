@@ -12,7 +12,7 @@ public class PromiseVertex extends BaseVertex<PromiseVertexController> {
     //region Constructor
     public PromiseVertex(Promise promise, UniGraph graph) {
         super(promise.getId(), "promise", null, null, graph);
-
+        this.promise = promise;
     }
     //endregion
 

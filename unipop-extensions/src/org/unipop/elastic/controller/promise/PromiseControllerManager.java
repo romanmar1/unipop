@@ -21,6 +21,7 @@ import org.unipop.elastic.controller.schema.helpers.schemaProviders.DefaultGraph
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProviderFactory;
 import org.unipop.elastic.helpers.ElasticClientFactory;
+import org.unipop.elastic.helpers.ElasticHelper;
 import org.unipop.elastic.helpers.ElasticMutations;
 import org.unipop.elastic.helpers.TimingAccessor;
 import org.unipop.elastic.controller.promise.helpers.elementConverters.PromiseVertexConverter;
@@ -63,6 +64,10 @@ public class PromiseControllerManager extends BasicControllerManager {
         }
 
         client = ElasticClientFactory.create(elasticConfiguration);
+
+        String indexName = configuration.getString("graphName", "graph");
+        ElasticHelper.createIndex(indexName, client);
+
         ElasticMutations elasticMutations = new ElasticMutations(false, client, new TimingAccessor());
         LazyGetterFactory lazyGetterFactory = new LazyGetterFactory(client, schemaProvider);
 

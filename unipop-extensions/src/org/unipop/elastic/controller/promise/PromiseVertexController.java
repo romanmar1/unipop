@@ -36,14 +36,15 @@ public class PromiseVertexController implements VertexController {
         if (predicates.hasContainers == null || predicates.hasContainers.size() == 0) {
             // promise all vertices
             return StreamSupport.stream(Spliterators.spliteratorUnknownSize(innerVertexController.vertices(predicates), 0), false)
-                    .flatMap(vertex -> StreamSupport.stream(this.elementConverter.convert(vertex).spliterator(), false).map(BaseVertex.class::cast))
+                    .flatMap(vertex -> StreamSupport.stream(this.elementConverter.convert(vertex).spliterator(), false))
+                    .map(BaseVertex.class::cast)
                     .iterator();
         } else if (predicates.hasContainers.size() > 1){
-            throw new IllegalArgumentException("Exactly one Has expected. Usage: has(\"promise\", ..., ...)");
+            throw new UnsupportedOperationException("Exactly one Has expected. Usage: has(\"promise\", ..., ...)");
         } else {
             HasContainer hasContainer = predicates.hasContainers.get(0);
             if (!hasContainer.getKey().toLowerCase().equals("promise")) {
-                throw new IllegalArgumentException("Promise Has expected. Usage: has(\"promise\", ..., ...)");
+                throw new UnsupportedOperationException("Promise Has expected. Usage: has(\"promise\", ..., ...)");
             }
 
             //I think Compare.neq also could be used...
@@ -53,7 +54,7 @@ public class PromiseVertexController implements VertexController {
             }*/
 
             Stream<Promise> promiseStream = Stream.empty();
-            if (hasContainer.getPredicate().getValue() == Compare.eq) {
+            if (hasContainer.getBiPredicate() == Compare.eq) {
                 promiseStream = Arrays.stream(new Promise[] {(Promise)hasContainer.getPredicate().getValue()});
             } else { // within
                 if (Iterable.class.isAssignableFrom(hasContainer.getPredicate().getValue().getClass())) {
