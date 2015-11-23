@@ -30,8 +30,8 @@ public class TraversalEdgeRedundancyTranslator extends TraversalVisitor{
     @Override
     protected void visitHasStep(HasStep hasStep) {
         ((List<HasContainer>)hasStep.getHasContainers()).stream().forEach(hasContainer -> {
-            Optional<String> redundantPropertyName =  this.edgeEnd.getEdgeRedundancy()
-                    .getRedundantPropertyName(hasContainer.getKey());
+            Optional<String> redundantPropertyName =  this.edgeEnd.getEdgeRedundancy().isPresent() ?
+                    this.edgeEnd.getEdgeRedundancy().get().getRedundantPropertyName(hasContainer.getKey()) : Optional.empty();
 
             if (redundantPropertyName.isPresent()) {
                 hasContainer.setKey(redundantPropertyName.get());
@@ -55,8 +55,8 @@ public class TraversalEdgeRedundancyTranslator extends TraversalVisitor{
                         propertiesStep.getTraversal(),
                         propertiesStep.getReturnType(),
                         Arrays.stream(propertiesStep.getPropertyKeys()).map(property -> {
-                            Optional<String> redundantPropertyName =  this.edgeEnd.getEdgeRedundancy()
-                                    .getRedundantPropertyName(property);
+                            Optional<String> redundantPropertyName =  this.edgeEnd.getEdgeRedundancy().isPresent() ?
+                                    this.edgeEnd.getEdgeRedundancy().get().getRedundantPropertyName(property) : Optional.empty();
 
                             if (redundantPropertyName.isPresent()) {
                                 return redundantPropertyName.get();

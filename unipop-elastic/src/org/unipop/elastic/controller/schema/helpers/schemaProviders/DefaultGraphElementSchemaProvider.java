@@ -51,6 +51,11 @@ public class DefaultGraphElementSchemaProvider implements GraphElementSchemaProv
                     public Optional<String> getType() {
                         return Optional.empty();
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -64,6 +69,11 @@ public class DefaultGraphElementSchemaProvider implements GraphElementSchemaProv
 
                     @Override
                     public Optional<String> getType() {
+                        return Optional.empty();
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
                         return Optional.empty();
                     }
                 });

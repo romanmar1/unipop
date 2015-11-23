@@ -1,10 +1,7 @@
 package org.unipop.elastic.promise;
 
 import org.apache.commons.lang3.StringUtils;
-import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphEdgeSchema;
-import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementRouting;
-import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
-import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphVertexSchema;
+import org.unipop.elastic.controller.schema.helpers.schemaProviders.*;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -327,6 +324,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("person");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -341,6 +343,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("person");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -383,6 +390,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("vertex");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -397,6 +409,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("vertex");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -439,6 +456,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("person");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -453,6 +475,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("software");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -495,6 +522,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("vertex");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -509,6 +541,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("vertex");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -551,6 +588,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("vertex");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -565,6 +607,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("vertex");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -607,6 +654,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("vertex");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -621,6 +673,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("vertex");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -663,6 +720,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("vertex");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -677,6 +739,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("vertex");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -719,6 +786,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("vertex");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -733,6 +805,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("vertex");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -775,6 +852,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("vertex");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -789,6 +871,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("vertex");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -831,6 +918,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("person");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -845,6 +937,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("person");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -887,6 +984,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("vertex");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -901,6 +1003,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("vertex");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -943,6 +1050,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("vertex");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -957,6 +1069,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("vertex");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -999,6 +1116,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("vertex");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -1013,6 +1135,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("vertex");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -1055,6 +1182,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("vertex");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -1069,6 +1201,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("vertex");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -1111,6 +1248,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("vertex");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -1125,6 +1267,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("vertex");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -1167,6 +1314,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("person");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -1181,6 +1333,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("person");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -1223,6 +1380,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("person");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -1237,6 +1399,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("software");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -1279,6 +1446,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("software");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -1293,6 +1465,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("person");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -1335,6 +1512,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("software");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -1349,6 +1531,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("software");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -1391,6 +1578,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("person");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -1405,6 +1597,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("person");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -1447,6 +1644,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("song");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -1461,6 +1663,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("song");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -1503,6 +1710,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("song");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -1517,6 +1729,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("artist");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -1559,6 +1776,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     public Optional<String> getType() {
                         return Optional.of("song");
                     }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -1573,6 +1795,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     @Override
                     public Optional<String> getType() {
                         return Optional.of("artist");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -1613,6 +1840,11 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
 
                     @Override
                     public Optional<String> getType() { return Optional.of("vertex"); }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
                 });
             }
 
@@ -1625,7 +1857,13 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
                     }
 
                     @Override
-                    public Optional<String> getType() { return Optional.of("vertex");
+                    public Optional<String> getType() {
+                        return Optional.of("vertex");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
                     }
                 });
             }
@@ -1662,4 +1900,3 @@ public class ModernGraphElementSchemaProvider implements GraphElementSchemaProvi
     protected String indexName;
     //endregion
 }
-

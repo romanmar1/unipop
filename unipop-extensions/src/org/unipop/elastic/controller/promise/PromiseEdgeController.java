@@ -166,7 +166,7 @@ public class PromiseEdgeController implements EdgeController {
             Iterable<IdPromise> outIdPromises,
             Iterable<TraversalPromise> outTraversalPromises) {
 
-        TraversalQueryTranslator traversalQueryTranslator = new TraversalQueryTranslator();
+        /*TraversalQueryTranslator traversalQueryTranslator = new TraversalQueryTranslator();
         for (TraversalPromise traversalPromise : outTraversalPromises) {
             QueryBuilder queryBuilder = new QueryBuilder();
             traversalQueryTranslator.applyTraversal(searchBuilder, queryBuilder, traversalPromise.getTraversal());
@@ -183,7 +183,7 @@ public class PromiseEdgeController implements EdgeController {
         searchBuilder.getAggregationBuilder().seekRoot().filters("outIdsPromisesFilters")
                 .filter("outIdsPromisesFilter", outIdsPromisesQueryBuilder)
                 .seek("outIdsPromisesFilters")
-                .terms("outIdsTerms").field("entityOutId").size(0).shardSize(0).executionHint("global_ordinals_hash");
+                .terms("outIdsTerms").field("entityOutId").size(0).shardSize(0).executionHint("global_ordinals_hash");*/
     }
 
     private void buildPromiseEdgeAggregationInQuery (

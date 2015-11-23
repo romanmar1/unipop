@@ -37,8 +37,8 @@ public class PromiseEdgeConverter implements ElementConverter<Element, Element> 
         return Arrays.asList(
                 new PromiseEdge(
                         element.id(),
-                        new PromiseVertex(new IdPromise(outVertex.id()), this.graph),
-                        new PromiseVertex(new IdPromise(inVertex.id()), this.graph),
+                        new PromiseVertex(new IdPromise(outVertex.id(), outVertex.label()), this.graph),
+                        new PromiseVertex(new IdPromise(inVertex.id(), inVertex.label()), this.graph),
                         this.graph));
     }
 

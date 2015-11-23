@@ -15,9 +15,9 @@ public class PromiseTests {
     public void simplePromiseTraversalToSearchBuilder() {
         Traversal traversal = __.or(__.has("prop1", "val1"), __.and(__.has("prop2", P.gt(2)), __.has("prop3", "val3")), __.has("prop4", "val4"));
 
-        TraversalQueryTranslator traversalQueryTranslator = new TraversalQueryTranslator();
         SearchBuilder searchBuilder = new SearchBuilder();
-        traversalQueryTranslator.applyTraversal(searchBuilder, searchBuilder.getQueryBuilder().query().filtered().filter(), traversal);
+        TraversalQueryTranslator traversalQueryTranslator = new TraversalQueryTranslator(searchBuilder, searchBuilder.getQueryBuilder().query().filtered().filter());
+        traversalQueryTranslator.visit(traversal);
 
         String query = searchBuilder.getQueryBuilder().getQuery().toString();
         int x = 5;
@@ -27,9 +27,9 @@ public class PromiseTests {
     public void promiseTraversalToSearchBuilderWithTraversalFilterStep() {
         Traversal traversal = __.or(__.has("prop1", "val1"), __.and(__.has("prop2", P.gt(2)), __.has("someProperty")));
 
-        TraversalQueryTranslator traversalQueryTranslator = new TraversalQueryTranslator();
         SearchBuilder searchBuilder = new SearchBuilder();
-        traversalQueryTranslator.applyTraversal(searchBuilder, searchBuilder.getQueryBuilder().query().filtered().filter(), traversal);
+        TraversalQueryTranslator traversalQueryTranslator = new TraversalQueryTranslator(searchBuilder, searchBuilder.getQueryBuilder().query().filtered().filter());
+        traversalQueryTranslator.visit(traversal);
 
         String query = searchBuilder.getQueryBuilder().getQuery().toString();
         int x = 5;
@@ -39,9 +39,9 @@ public class PromiseTests {
     public void promiseTraversalToSearchBuilderWithNotStep() {
         Traversal traversal = __.or(__.has("prop1", "val1"), __.and(__.has("prop2", P.gt(2)), __.not(__.has("someProperty"))));
 
-        TraversalQueryTranslator traversalQueryTranslator = new TraversalQueryTranslator();
         SearchBuilder searchBuilder = new SearchBuilder();
-        traversalQueryTranslator.applyTraversal(searchBuilder, searchBuilder.getQueryBuilder().query().filtered().filter(), traversal);
+        TraversalQueryTranslator traversalQueryTranslator = new TraversalQueryTranslator(searchBuilder, searchBuilder.getQueryBuilder().query().filtered().filter());
+        traversalQueryTranslator.visit(traversal);
 
         String query = searchBuilder.getQueryBuilder().getQuery().toString();
         int x = 5;

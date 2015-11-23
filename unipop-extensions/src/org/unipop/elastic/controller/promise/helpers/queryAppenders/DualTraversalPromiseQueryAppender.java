@@ -132,6 +132,8 @@ public class DualTraversalPromiseQueryAppender extends GraphQueryAppenderBase<Pr
                 int x = 5;
             }
         }
+
+        return true;
     }
     //endregion
 }
