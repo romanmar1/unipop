@@ -13,6 +13,16 @@ public class TraversalPromise implements Promise{
     }
     //endregion
 
+    //region Override Methods
+    @Override
+    public TraversalPromise clone() throws CloneNotSupportedException {
+        TraversalPromise clone = (TraversalPromise)super.clone();
+        clone.id = this.id;
+        clone.traversal = this.traversal.asAdmin().clone();
+        return clone;
+    }
+    //endregion
+
     //region Promise Implementation
     public Object getId() {
         return id;

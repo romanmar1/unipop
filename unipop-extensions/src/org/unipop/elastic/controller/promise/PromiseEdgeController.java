@@ -1,7 +1,5 @@
 package org.unipop.elastic.controller.promise;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
-import org.apache.tinkerpop.gremlin.process.traversal.Compare;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.structure.Direction;
@@ -17,7 +15,6 @@ import org.unipop.elastic.controller.schema.helpers.elementConverters.ElementCon
 import org.unipop.structure.BaseEdge;
 import org.unipop.structure.BaseVertex;
 import org.unipop.structure.UniGraph;
-
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -106,31 +103,33 @@ public class PromiseEdgeController implements EdgeController {
         SearchBuilder searchBuilder = new SearchBuilder();
         buildPromiseEdgePredicatesQuery(searchBuilder, edgeHasContainers);
 
+        // build first level of aggregation
         Iterable<Promise> outPromises = this.extractPromises(outPromiseHasContainers);
-        Iterable<IdPromise> outIdPromises = StreamSupport.stream(outPromises.spliterator(), false)
-                .filter(promise -> promise instanceof IdPromise)
-                .map(IdPromise.class::cast)
-                .collect(Collectors.toList());
-        Iterable<TraversalPromise> outTraversalPromises = StreamSupport.stream(outPromises.spliterator(), false)
-                .filter(promise -> promise instanceof TraversalPromise)
-                .map(TraversalPromise.class::cast)
-                .collect(Collectors.toList());
-
+        Iterable<IdPromise> outIdPromises = getIdPromises(outPromises);
+        Iterable<TraversalPromise> outTraversalPromises = getTraversalPromises(outPromises);
         buildPromiseEdgeAggregationOutQuery(searchBuilder, outIdPromises, outTraversalPromises);
 
+        // build second level of aggregation
         Iterable<Promise> inPromises = this.extractPromises(inPromiseHasContainers);
-        Iterable<IdPromise> inIdPromises = StreamSupport.stream(inPromises.spliterator(), false)
-                .filter(promise -> promise instanceof IdPromise)
-                .map(IdPromise.class::cast)
-                .collect(Collectors.toList());
-        Iterable<TraversalPromise> inTraversalPromises = StreamSupport.stream(outPromises.spliterator(), false)
-                .filter(promise -> promise instanceof TraversalPromise)
-                .map(TraversalPromise.class::cast)
-                .collect(Collectors.toList());
-
+        Iterable<IdPromise> inIdPromises = getIdPromises(inPromises);
+        Iterable<TraversalPromise> inTraversalPromises = getTraversalPromises(outPromises);
         buildPromiseEdgeAggregationInQuery(searchBuilder, inIdPromises, inTraversalPromises);
 
         return searchBuilder;
+    }
+
+    private List<TraversalPromise> getTraversalPromises(Iterable<Promise> outPromises) {
+        return StreamSupport.stream(outPromises.spliterator(), false)
+                .filter(promise -> promise instanceof TraversalPromise)
+                .map(TraversalPromise.class::cast)
+                .collect(Collectors.toList());
+    }
+
+    private Iterable<IdPromise> getIdPromises(Iterable<Promise> outPromises) {
+        return StreamSupport.stream(outPromises.spliterator(), false)
+                    .filter(promise -> promise instanceof IdPromise)
+                    .map(IdPromise.class::cast)
+                    .collect(Collectors.toList());
     }
 
     private Iterable<Promise> extractPromises(Iterable<HasContainer> hasContainers) {

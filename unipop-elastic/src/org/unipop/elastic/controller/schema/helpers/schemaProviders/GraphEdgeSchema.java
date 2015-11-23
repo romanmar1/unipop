@@ -15,6 +15,8 @@ public interface GraphEdgeSchema extends GraphElementSchema {
     public interface End {
         public String getIdField();
         public Optional<String> getType();
+
+        public GraphEdgeRedundancy getEdgeRedundancy();
     }
 
     public interface Direction {

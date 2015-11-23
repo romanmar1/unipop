@@ -7,8 +7,9 @@ import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
  */
 public class IdPromise implements Promise {
     //region Constructor
-    public IdPromise(Object id) {
+    public IdPromise(Object id, String label) {
         this.id = id;
+        this.label = label;
     }
     //endregion
 
@@ -19,7 +20,14 @@ public class IdPromise implements Promise {
     }
     //endregion
 
+    //region Properties
+    public String getLabel() {
+        return label;
+    }
+    //endregion
+
     //region fields
     private Object id;
+    private String label;
     //endregion
 }
