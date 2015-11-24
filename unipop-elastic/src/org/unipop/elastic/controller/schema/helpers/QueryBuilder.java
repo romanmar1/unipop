@@ -531,6 +531,15 @@ public class QueryBuilder implements Cloneable{
         return result;
     }
 
+    public QueryBuilder parent() {
+        if (this.current == this.root) {
+            return this;
+        }
+
+        this.current = this.current.getParent();
+        return this;
+    }
+
     //endregion
 
     //region Properties
@@ -659,7 +668,7 @@ public class QueryBuilder implements Cloneable{
             return children;
         }
 
-        protected Composite getParent() {
+        public Composite getParent() {
             return parent;
         }
         //endregion

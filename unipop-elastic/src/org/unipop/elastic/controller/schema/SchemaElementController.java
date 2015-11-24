@@ -94,7 +94,7 @@ public abstract class SchemaElementController {
     protected void translateHasContainers(SearchBuilder searchBuilder, ArrayList<HasContainer> hasContainers) {
         HasContainersQueryTranslator hasContainersQueryTranslator = new HasContainersQueryTranslator();
         for (HasContainer hasContainer : hasContainers) {
-            searchBuilder.getQueryBuilder().seekRoot().query().filtered().filter().bool();
+            searchBuilder.getQueryBuilder().seekRoot().query().filtered().filter().bool().must();
             hasContainersQueryTranslator.applyHasContainer(searchBuilder, searchBuilder.getQueryBuilder(), hasContainer);
         }
     }

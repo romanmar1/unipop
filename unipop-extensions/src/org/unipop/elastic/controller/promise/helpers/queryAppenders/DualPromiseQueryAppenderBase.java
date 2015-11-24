@@ -3,6 +3,7 @@ package org.unipop.elastic.controller.promise.helpers.queryAppenders;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.unipop.elastic.controller.promise.Promise;
 import org.unipop.elastic.controller.promise.TraversalPromise;
+import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.TraversalEdgeRedundancyTranslator;
 import org.unipop.elastic.controller.schema.helpers.QueryBuilder;
 import org.unipop.elastic.controller.schema.helpers.SearchBuilder;
@@ -13,6 +14,7 @@ import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElement
 import org.unipop.structure.UniGraph;
 
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
 /**
@@ -26,12 +28,16 @@ public abstract class DualPromiseQueryAppenderBase<TInput extends PromiseTypesBu
     //endregion
 
     //region Protected Methods
-    protected QueryBuilder buildPromisePredicateQuery(TraversalPromise traversalPromisePredicate, SearchBuilder searchBuilder, Iterable<GraphEdgeSchema> edgeSchemas) {
+    protected QueryBuilder buildPromiseQuery(
+            TraversalPromise traversalPromisePredicate,
+            SearchBuilder searchBuilder,
+            Iterable<GraphEdgeSchema> edgeSchemas,
+            Function<GraphEdgeSchema, GraphEdgeSchema.End> edgeEndFunction) {
         long edgeSchemasCount = StreamSupport.stream(edgeSchemas.spliterator(), false).count();
 
         QueryBuilder traversalPromiseQueryBuilder = edgeSchemasCount == 1 ?
-                new QueryBuilder().query().filtered().filter("promiseSchemasRoot") :
-                new QueryBuilder().query().filtered().filter().bool().should("promiseSchemasRoot");
+                new QueryBuilder().query().filtered().filter(PromiseStringConstants.PROMISE_SCHEMAS_ROOT) :
+                new QueryBuilder().query().filtered().filter().bool().should(PromiseStringConstants.PROMISE_SCHEMAS_ROOT);
 
         TraversalQueryTranslator traversalQueryTranslator =
                 new TraversalQueryTranslator(searchBuilder, traversalPromiseQueryBuilder);
@@ -40,9 +46,10 @@ public abstract class DualPromiseQueryAppenderBase<TInput extends PromiseTypesBu
             try {
                 // translate the traversal with redundant property names;
                 TraversalPromise clonedTraversalPromise = traversalPromisePredicate.clone();
-                new TraversalEdgeRedundancyTranslator(edgeSchema.getDestination().get()).visit(clonedTraversalPromise.getTraversal());
+                new TraversalEdgeRedundancyTranslator(edgeEndFunction.apply(edgeSchema)).visit(clonedTraversalPromise.getTraversal());
 
                 // build the query for the promise based on the promise traversal
+                traversalPromiseQueryBuilder.seek(PromiseStringConstants.PROMISE_SCHEMAS_ROOT);
                 traversalQueryTranslator.visit(clonedTraversalPromise.getTraversal());
             } catch (CloneNotSupportedException ex) {
                 //TODO: handle clone exception

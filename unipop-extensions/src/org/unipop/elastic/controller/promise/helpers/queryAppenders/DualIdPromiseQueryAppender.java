@@ -85,10 +85,12 @@ public class DualIdPromiseQueryAppender extends DualPromiseQueryAppenderBase<Pro
                 StreamSupport.stream(input.getTraversalPromisesPredicates().spliterator(), false).count() > 0) {
             // if we do have traversal promise predicates, we must build filter aggregations for them.
             StreamSupport.stream(input.getTraversalPromisesPredicates().spliterator(), false).forEach(traversalPromisePredicate -> {
-                QueryBuilder traversalPromiseQueryBuilder = super.buildPromisePredicateQuery(
+                QueryBuilder traversalPromiseQueryBuilder = super.buildPromiseQuery(
                         traversalPromisePredicate,
                         input.getSearchBuilder(),
-                        Arrays.asList(edgeSchema.get()));
+                        Arrays.asList(edgeSchema.get()),
+                        edgeSchema1 -> edgeSchema1.getDestination().get());
+
                 input.getSearchBuilder().getAggregationBuilder().seek(edgeSchema.get().getSource().get().getIdField())
                         .filters(PromiseStringConstants.PREDICATES_PROMISES)
                         .filter(traversalPromisePredicate.getId().toString(), traversalPromiseQueryBuilder);
@@ -108,21 +110,9 @@ public class DualIdPromiseQueryAppender extends DualPromiseQueryAppenderBase<Pro
 
     //region Private Methods
     private QueryBuilder buildPromiseQueryFilter(Iterable<IdPromise> idPromises, GraphEdgeSchema edgeSchema) {
-        QueryBuilder idPromiseQueryBuilder = new QueryBuilder().query().filtered().filter(PromiseStringConstants.PROMISE_SCHEMAS_ROOT);
-
-        // only if the direction is not BOTH, add a direction filter to the mix.
-        if (this.getDirection().isPresent() && this.getDirection().get() != Direction.BOTH) {
-            String promiseSchemaRoot = Integer.toString(edgeSchema.hashCode());
-            idPromiseQueryBuilder.bool().must(promiseSchemaRoot)
-                    .term(edgeSchema.getDirection().get().getField(), getDirection().get() == Direction.IN ?
-                            edgeSchema.getDirection().get().getInValue() :
-                            edgeSchema.getDirection().get().getOutValue())
-                    .seek(promiseSchemaRoot);
-        }
-
-        idPromiseQueryBuilder.terms(
-                edgeSchema.getSource().get().getIdField(),
-                StreamSupport.stream(idPromises.spliterator(), false).map(idPromise -> idPromise.getId()).collect(Collectors.toList()));
+        QueryBuilder idPromiseQueryBuilder = new QueryBuilder().query().filtered().filter(PromiseStringConstants.PROMISE_SCHEMAS_ROOT)
+                .terms(edgeSchema.getSource().get().getIdField(),
+                    StreamSupport.stream(idPromises.spliterator(), false).map(idPromise -> idPromise.getId()).collect(Collectors.toList()));
 
         return idPromiseQueryBuilder;
     }

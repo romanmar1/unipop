@@ -20,7 +20,7 @@ public class HasContainersQueryTranslator {
         }
 
         if (hasContainer.getPredicate() instanceof ExistsP) {
-            queryBuilder.must().exists(hasContainer.getKey());
+            queryBuilder.exists(hasContainer.getKey());
         }
 
         if (hasContainer.getBiPredicate() != null ) {
@@ -28,16 +28,16 @@ public class HasContainersQueryTranslator {
                 Compare compare = (Compare) hasContainer.getBiPredicate();
                 switch (compare) {
                     case eq:
-                        queryBuilder.must().term(hasContainer.getKey(), hasContainer.getValue());
+                        queryBuilder.term(hasContainer.getKey(), hasContainer.getValue());
                         break;
                     case neq:
-                        queryBuilder.mustNot().term(hasContainer.getKey(), hasContainer.getValue());
+                        queryBuilder.bool().mustNot().term(hasContainer.getKey(), hasContainer.getValue());
                         break;
                     case gt:
                     case gte:
                     case lt:
                     case lte:
-                        queryBuilder.must().range(hasContainer.getKey(), compare, hasContainer.getValue());
+                        queryBuilder.range(hasContainer.getKey(), compare, hasContainer.getValue());
                         break;
                     default:
                         throw new IllegalArgumentException(String.format("predicate not supported in has step: %s" + hasContainer.toString()));
@@ -47,16 +47,16 @@ public class HasContainersQueryTranslator {
                 switch (contains) {
                     case within:
                         if (hasContainer.getValue() != null) {
-                            queryBuilder.must().terms(hasContainer.getKey(), hasContainer.getValue());
+                            queryBuilder.terms(hasContainer.getKey(), hasContainer.getValue());
                         } else {
-                            queryBuilder.must().exists(hasContainer.getKey());
+                            queryBuilder.exists(hasContainer.getKey());
                         }
                         break;
                     case without:
                         if (hasContainer.getValue() != null) {
-                            queryBuilder.mustNot().terms(hasContainer.getKey(), hasContainer.getValue());
+                            queryBuilder.bool().mustNot().terms(hasContainer.getKey(), hasContainer.getValue());
                         } else {
-                            queryBuilder.mustNot().exists(hasContainer.getKey());
+                            queryBuilder.bool().mustNot().exists(hasContainer.getKey());
                         }
                         break;
 
@@ -76,11 +76,11 @@ public class HasContainersQueryTranslator {
                         Compare compare = (Compare) hasContainer.getBiPredicate();
                         switch (compare) {
                             case eq:
-                                queryBuilder.must().ids(Arrays.asList(hasContainer.getValue()));
+                                queryBuilder.ids(Arrays.asList(hasContainer.getValue()));
                                 break;
 
                             case neq:
-                                queryBuilder.mustNot().ids(Arrays.asList(hasContainer.getValue()));
+                                queryBuilder.bool().mustNot().ids(Arrays.asList(hasContainer.getValue()));
                                 break;
 
                             default:
@@ -92,14 +92,14 @@ public class HasContainersQueryTranslator {
                         switch (contains) {
                             case within:
                                 if (hasContainer.getValue() != null) {
-                                    queryBuilder.must().ids(Arrays.asList(convertValueToStringArray(hasContainer.getValue())),
+                                    queryBuilder.ids(Arrays.asList(convertValueToStringArray(hasContainer.getValue())),
                                             searchBuilder.getTypes().stream().toArray(String[]::new));
                                 }
                                 break;
 
                             case without:
                                 if (hasContainer.getValue() != null) {
-                                    queryBuilder.mustNot().ids(Arrays.asList(convertValueToStringArray(hasContainer.getValue())),
+                                    queryBuilder.bool().mustNot().ids(Arrays.asList(convertValueToStringArray(hasContainer.getValue())),
                                             searchBuilder.getTypes().stream().toArray(String[]::new));
                                 }
 

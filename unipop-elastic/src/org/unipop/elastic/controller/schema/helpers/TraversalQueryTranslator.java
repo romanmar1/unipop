@@ -1,5 +1,7 @@
 package org.unipop.elastic.controller.schema.helpers;
 
+import org.apache.tinkerpop.gremlin.process.traversal.Compare;
+import org.apache.tinkerpop.gremlin.process.traversal.Contains;
 import org.apache.tinkerpop.gremlin.process.traversal.Step;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.step.filter.*;
@@ -7,6 +9,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.step.map.PropertiesStep;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.unipop.elastic.controller.ExistsP;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -73,32 +76,41 @@ public class TraversalQueryTranslator extends TraversalVisitor{
 
     @Override
     protected void visitHasStep(HasStep hasStep) {
-        int nextSequenceNumber = sequenceSupplier.get();
-        String currentLabel = "bool_" + nextSequenceNumber;
-        queryBuilder.bool(currentLabel);
-
         HasContainersQueryTranslator hasContainersQueryTranslator = new HasContainersQueryTranslator();
-        hasStep.getHasContainers().forEach(hasContainer -> {
-            queryBuilder.seek(currentLabel);
-            hasContainersQueryTranslator.applyHasContainer(searchBuilder, queryBuilder, (HasContainer) hasContainer);
-        });
+
+        if (hasStep.getHasContainers().size() == 1) {
+            hasContainersQueryTranslator.applyHasContainer(searchBuilder, queryBuilder, (HasContainer)hasStep.getHasContainers().get(0));
+        } else {
+            int nextSequenceNumber = sequenceSupplier.get();
+            String currentLabel = "must_" + nextSequenceNumber;
+            queryBuilder.bool().must(currentLabel);
+
+            hasStep.getHasContainers().forEach(hasContainer -> {
+                queryBuilder.seek(currentLabel);
+                hasContainersQueryTranslator.applyHasContainer(searchBuilder, queryBuilder, (HasContainer) hasContainer);
+            });
+        }
     }
 
     @Override
     protected void visitTraversalFilterStep(TraversalFilterStep traversalFilterStep) {
-        int nextSequenceNumber = sequenceSupplier.get();
-        String currentLabel = "should_" + nextSequenceNumber;
-        queryBuilder.bool().should(currentLabel);
-
         if (traversalFilterStep.getLocalChildren().size() == 1) {
             Traversal.Admin subTraversal = (Traversal.Admin)traversalFilterStep.getLocalChildren().get(0);
             if (subTraversal.getSteps().size() == 1
                     && PropertiesStep.class.isAssignableFrom(subTraversal.getSteps().get(0).getClass())) {
                 PropertiesStep propertiesStep = (PropertiesStep) subTraversal.getSteps().get(0);
 
-                for (String key : propertiesStep.getPropertyKeys()) {
-                    queryBuilder.seek(currentLabel);
-                    this.visitRecursive(new HasStep<>(null, new HasContainer(key, new ExistsP<Object>())));
+                if (propertiesStep.getPropertyKeys().length == 1) {
+                    this.visitRecursive(new HasStep<>(null, new HasContainer(propertiesStep.getPropertyKeys()[0], new ExistsP<Object>())));
+                } else {
+                    int nextSequenceNumber = sequenceSupplier.get();
+                    String currentLabel = "should_" + nextSequenceNumber;
+                    queryBuilder.bool().should(currentLabel);
+
+                    for (String key : propertiesStep.getPropertyKeys()) {
+                        queryBuilder.seek(currentLabel);
+                        this.visitRecursive(new HasStep<>(null, new HasContainer(key, new ExistsP<Object>())));
+                    }
                 }
             }
         }

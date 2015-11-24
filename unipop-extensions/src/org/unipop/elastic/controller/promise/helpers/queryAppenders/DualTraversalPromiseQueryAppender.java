@@ -58,7 +58,12 @@ public class DualTraversalPromiseQueryAppender extends DualPromiseQueryAppenderB
 
         // aggregation layer 1
         StreamSupport.stream(input.getPromises().spliterator(), false).forEach(traversalPromise -> {
-            QueryBuilder traversalPromiseQueryBuilder = buildPromiseQuery(traversalPromise, input.getSearchBuilder(), edgeSchemas);
+            QueryBuilder traversalPromiseQueryBuilder = super.buildPromiseQuery(
+                    traversalPromise,
+                    input.getSearchBuilder(),
+                    edgeSchemas,
+                    edgeSchema -> edgeSchema.getSource().get());
+
             input.getSearchBuilder().getAggregationBuilder().seekRoot().filters(PromiseStringConstants.BULK_TRAVERSAL_PROMISES)
                     .filter(traversalPromise.getId().toString(), traversalPromiseQueryBuilder);
         });
@@ -68,7 +73,12 @@ public class DualTraversalPromiseQueryAppender extends DualPromiseQueryAppenderB
                 StreamSupport.stream(input.getTraversalPromisesPredicates().spliterator(), false).count() > 0) {
             // if we do have traversal promise predicates, we must build filter aggregations for them.
             StreamSupport.stream(input.getTraversalPromisesPredicates().spliterator(), false).forEach(traversalPromisePredicate -> {
-                QueryBuilder traversalPromiseQueryBuilder = super.buildPromisePredicateQuery(traversalPromisePredicate, input.getSearchBuilder(), edgeSchemas);
+                QueryBuilder traversalPromiseQueryBuilder = super.buildPromiseQuery(
+                        traversalPromisePredicate,
+                        input.getSearchBuilder(),
+                        edgeSchemas,
+                        edgeSchema -> edgeSchema.getDestination().get());
+
                 input.getSearchBuilder().getAggregationBuilder().seekRoot()
                         .filters(PromiseStringConstants.BULK_TRAVERSAL_PROMISES)
                         .filters(PromiseStringConstants.PREDICATES_PROMISES)
@@ -99,44 +109,6 @@ public class DualTraversalPromiseQueryAppender extends DualPromiseQueryAppenderB
     //endregion
 
     //region Private Methods
-    private QueryBuilder buildPromiseQuery(TraversalPromise traversalPromise, SearchBuilder searchBuilder, Iterable<GraphEdgeSchema> edgeSchemas) {
-        long edgeSchemasCount = StreamSupport.stream(edgeSchemas.spliterator(), false).count();
-
-        QueryBuilder traversalPromiseQueryBuilder = edgeSchemasCount == 1 ?
-                new QueryBuilder().query().filtered().filter(PromiseStringConstants.PROMISE_SCHEMAS_ROOT) :
-                new QueryBuilder().query().filtered().filter().bool().should(PromiseStringConstants.PROMISE_SCHEMAS_ROOT);
-
-        TraversalQueryTranslator traversalQueryTranslator =
-                new TraversalQueryTranslator(searchBuilder, traversalPromiseQueryBuilder);
-
-        for (GraphEdgeSchema edgeSchema : edgeSchemas) {
-            try {
-                traversalPromiseQueryBuilder.seek(PromiseStringConstants.PROMISE_SCHEMAS_ROOT);
-
-                // translate the traversal with redundant property names;
-                TraversalPromise clonedTraversalPromise = traversalPromise.clone();
-                new TraversalEdgeRedundancyTranslator(edgeSchema.getSource().get()).visit(clonedTraversalPromise.getTraversal());
-
-                // only if the direction is not BOTH, add a direction filter to the mix.
-                if (this.getDirection().isPresent() && this.getDirection().get() != Direction.BOTH) {
-                    String promiseSchemaRoot = Integer.toString(edgeSchema.hashCode());
-                    traversalPromiseQueryBuilder.bool().must(promiseSchemaRoot)
-                            .term(edgeSchema.getDirection().get().getField(), getDirection().get() == Direction.IN ?
-                                    edgeSchema.getDirection().get().getInValue() :
-                                    edgeSchema.getDirection().get().getOutValue())
-                            .seek(promiseSchemaRoot);
-                }
-
-                traversalQueryTranslator.visit(clonedTraversalPromise.getTraversal());
-            } catch (CloneNotSupportedException ex) {
-                //TODO: handle clone exception
-                int x = 5;
-            }
-        }
-
-        return traversalPromiseQueryBuilder;
-    }
-
     private Iterable<GraphEdgeSchema> getAllEdgeSchemasFromTypes(Iterable<String> edgeTypes) {
         return StreamSupport.stream(edgeTypes.spliterator(), false)
                 .<GraphEdgeSchema>flatMap(typeToQuery -> this.getSchemaProvider().getEdgeSchemas(typeToQuery).isPresent() ?
