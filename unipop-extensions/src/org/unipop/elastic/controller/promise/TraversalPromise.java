@@ -16,10 +16,7 @@ public class TraversalPromise implements Promise{
     //region Override Methods
     @Override
     public TraversalPromise clone() throws CloneNotSupportedException {
-        TraversalPromise clone = (TraversalPromise)super.clone();
-        clone.id = this.id;
-        clone.traversal = this.traversal.asAdmin().clone();
-        return clone;
+        return new TraversalPromise(this.id, this.traversal.asAdmin().clone());
     }
     //endregion
 

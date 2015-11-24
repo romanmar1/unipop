@@ -9,16 +9,16 @@ import org.unipop.elastic.controller.schema.helpers.SearchBuilder;
 /**
  * Created by Karni on 11/23/2015.
  */
-public class PromiseTypeBulkInput<TPromise> {
+public class PromiseTypesBulkInput<TPromise> {
     //region Constructor
-    public PromiseTypeBulkInput(
+    public PromiseTypesBulkInput(
             Iterable<TPromise> promises,
             Iterable<TraversalPromise> traversalPromisesPredicates,
-            String typeToQuery,
+            Iterable<String> typesToQuery,
             SearchBuilder searchBuilder) {
         this.promises = promises;
         this.traversalPromisesPredicates = traversalPromisesPredicates;
-        this.typeToQuery = typeToQuery;
+        this.typesToQuery = typesToQuery;
         this.searchBuilder = searchBuilder;
     }
     //endregion
@@ -32,8 +32,8 @@ public class PromiseTypeBulkInput<TPromise> {
         return this.traversalPromisesPredicates;
     }
 
-    public String getTypeToQuery() {
-        return this.typeToQuery;
+    public Iterable<String> getTypesToQuery() {
+        return this.typesToQuery;
     }
 
     public SearchBuilder getSearchBuilder() {
@@ -44,7 +44,7 @@ public class PromiseTypeBulkInput<TPromise> {
     //region Fields
     private Iterable<TPromise> promises;
     private Iterable<TraversalPromise> traversalPromisesPredicates;
-    private String typeToQuery;
+    private Iterable<String> typesToQuery;
 
     private SearchBuilder searchBuilder;
     //endregion

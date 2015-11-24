@@ -16,7 +16,7 @@ public class IdPromise implements Promise {
     //region Promise Implementation
     @Override
     public Object getId() {
-        return null;
+        return id;
     }
     //endregion
 

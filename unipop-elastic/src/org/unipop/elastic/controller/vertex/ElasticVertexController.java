@@ -15,6 +15,7 @@ import org.unipop.elastic.controller.Predicates;
 import org.unipop.elastic.controller.VertexController;
 import org.unipop.elastic.controller.edge.ElasticEdge;
 import org.unipop.elastic.controller.schema.helpers.AggregationBuilder;
+import org.unipop.elastic.controller.schema.helpers.ExecutionHintStrings;
 import org.unipop.elastic.controller.schema.helpers.SearchAggregationIterable;
 import org.unipop.elastic.controller.schema.helpers.aggregationConverters.*;
 import org.unipop.elastic.helpers.*;
@@ -94,7 +95,7 @@ public class ElasticVertexController implements VertexController {
         boolFilter.must(FilterBuilders.missingFilter(ElasticEdge.InId));
 
         AggregationBuilder aggregationBuilder = new AggregationBuilder();
-        AggregationHelper.applyAggregationBuilder(aggregationBuilder, keyTraversal, reducerTraversal, 0, 0, "global_ordinal_hash");
+        AggregationHelper.applyAggregationBuilder(aggregationBuilder, keyTraversal, reducerTraversal, 0, 0, ExecutionHintStrings.GLOBAL_ORIDNAL_HASH);
 
         SearchRequestBuilder searchRequest = client.prepareSearch().setIndices(defaultIndex)
                 .setQuery(QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), boolFilter))

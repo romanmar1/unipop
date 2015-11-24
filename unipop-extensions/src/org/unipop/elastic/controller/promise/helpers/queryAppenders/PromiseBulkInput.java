@@ -37,7 +37,7 @@ public class PromiseBulkInput {
     }
 
     public Iterable<TraversalPromise> getTraversalPromisesPredicates() {
-        return this.traversalPromisesBulk;
+        return this.traversalPromisesPredicates;
     }
 
     public Iterable<String> getTypesToQuery() {

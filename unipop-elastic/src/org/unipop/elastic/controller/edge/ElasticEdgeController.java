@@ -15,6 +15,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.javatuples.Pair;
 import org.unipop.elastic.controller.Predicates;
 import org.unipop.elastic.controller.schema.helpers.AggregationBuilder;
+import org.unipop.elastic.controller.schema.helpers.ExecutionHintStrings;
 import org.unipop.elastic.controller.schema.helpers.SearchAggregationIterable;
 import org.unipop.elastic.controller.schema.helpers.aggregationConverters.*;
 import org.unipop.elastic.helpers.*;
@@ -168,7 +169,7 @@ public class ElasticEdgeController implements org.unipop.elastic.controller.Edge
                     reducerTraversal,
                     0,
                     0,
-                    "global_ordinal_hash"
+                    ExecutionHintStrings.GLOBAL_ORIDNAL_HASH
             );
     }
 
