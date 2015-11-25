@@ -51,7 +51,7 @@ public class QueryBuilder implements Cloneable{
 
     //region Constructor
     public QueryBuilder() {
-        int x = 5;
+        this.currentStack = new Stack<>();
     }
     //endregion
 
@@ -469,6 +469,19 @@ public class QueryBuilder implements Cloneable{
         return this;
     }
 
+    public QueryBuilder push() {
+        this.currentStack.push(this.current);
+        return this;
+    }
+
+    public QueryBuilder pop() {
+        if (this.currentStack.size() > 0) {
+            this.current = this.currentStack.pop();
+        }
+
+        return this;
+    }
+
     public org.elasticsearch.index.query.QueryBuilder getQuery() {
         if (root == null) {
             return null;
@@ -573,6 +586,7 @@ public class QueryBuilder implements Cloneable{
     //region Fields
     private Composite root;
     private Composite current;
+    private Stack<Composite> currentStack;
     //endregion
 
     //region Composite
