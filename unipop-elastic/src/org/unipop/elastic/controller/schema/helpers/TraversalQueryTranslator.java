@@ -28,14 +28,9 @@ public class TraversalQueryTranslator extends TraversalVisitor{
     //Override Methods
     @Override
     protected void visitRecursive(Object o) {
+        this.queryBuilder.push();
         super.visitRecursive(o);
-
-        // back to previous position
-        if (this.lastParentLabel == null) {
-            queryBuilder.seekRoot();
-        } else {
-            queryBuilder.seek(this.lastParentLabel);
-        }
+        this.queryBuilder.pop();
     }
 
     @Override
@@ -44,10 +39,7 @@ public class TraversalQueryTranslator extends TraversalVisitor{
         String currentLabel = "mustNot_" + nextSequenceNumber;
         queryBuilder.bool().mustNot(currentLabel);
 
-        String currentParentLabel = this.lastParentLabel;
-        this.lastParentLabel = currentLabel;
         super.visitNotStep(notStep);
-        this.lastParentLabel = currentParentLabel;
     }
 
     @Override
@@ -56,10 +48,7 @@ public class TraversalQueryTranslator extends TraversalVisitor{
         String currentLabel = "should_" + nextSequenceNumber;
         queryBuilder.bool().should(currentLabel);
 
-        String currentParentLabel = this.lastParentLabel;
-        this.lastParentLabel = currentLabel;
         super.visitOrStep(orStep);
-        this.lastParentLabel = currentParentLabel;
     }
 
     @Override
@@ -68,10 +57,7 @@ public class TraversalQueryTranslator extends TraversalVisitor{
         String currentLabel = "must_" + nextSequenceNumber;
         queryBuilder.bool().must(currentLabel);
 
-        String currentParentLabel = this.lastParentLabel;
-        this.lastParentLabel = currentLabel;
         super.visitAndStep(andStep);
-        this.lastParentLabel = currentParentLabel;
     }
 
     @Override
@@ -120,7 +106,6 @@ public class TraversalQueryTranslator extends TraversalVisitor{
     //region Fields
     private SearchBuilder searchBuilder;
     private QueryBuilder queryBuilder;
-    private String lastParentLabel;
     private int sequenceNumber = 0;
     private Supplier<Integer> sequenceSupplier;
     //endregion
