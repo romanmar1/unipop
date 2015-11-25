@@ -17,10 +17,7 @@ import org.unipop.elastic.controller.schema.helpers.schemaProviders.CachedGraphE
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.DefaultGraphElementSchemaProvider;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProviderFactory;
-import org.unipop.elastic.helpers.ElasticClientFactory;
-import org.unipop.elastic.helpers.ElasticHelper;
-import org.unipop.elastic.helpers.ElasticMutations;
-import org.unipop.elastic.helpers.TimingAccessor;
+import org.unipop.elastic.helpers.*;
 import org.unipop.structure.UniGraph;
 
 import java.io.IOException;
@@ -57,7 +54,7 @@ public class SchemaControllerManager extends BasicControllerManager {
         ElasticHelper.createIndex(indexName, client);
 
         lazyGetterFactory = new LazyGetterFactory(client, schemaProvider);
-        this.elasticMutations = new ElasticMutations(false, client, new TimingAccessor());
+        this.elasticMutations = new ElasticSchemaGraphMutations(schemaProvider, false, client, new TimingAccessor());
 
         this.vertexController = new SchemaVertexController(
                 graph,
@@ -110,7 +107,7 @@ public class SchemaControllerManager extends BasicControllerManager {
     protected GraphElementSchemaProvider schemaProvider;
     protected VertexController vertexController;
     protected EdgeController edgeController;
-    protected ElasticMutations elasticMutations;
+    protected ElasticSchemaGraphMutations elasticMutations;
     protected LazyGetterFactory lazyGetterFactory;
     protected Client client;
 

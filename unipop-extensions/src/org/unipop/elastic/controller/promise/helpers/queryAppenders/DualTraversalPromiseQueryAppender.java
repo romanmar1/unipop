@@ -3,15 +3,11 @@ package org.unipop.elastic.controller.promise.helpers.queryAppenders;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.unipop.elastic.controller.promise.TraversalPromise;
 import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
-import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.TraversalEdgeRedundancyTranslator;
 import org.unipop.elastic.controller.schema.helpers.ExecutionHintStrings;
 import org.unipop.elastic.controller.schema.helpers.QueryBuilder;
-import org.unipop.elastic.controller.schema.helpers.SearchBuilder;
-import org.unipop.elastic.controller.schema.helpers.TraversalQueryTranslator;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphEdgeSchema;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.structure.UniGraph;
-
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,7 +16,6 @@ import java.util.stream.StreamSupport;
 /**
  * Created by Karni on 11/23/2015.
  */
-@SuppressWarnings("Duplicates")
 public class DualTraversalPromiseQueryAppender extends DualPromiseQueryAppenderBase<PromiseTypesBulkInput<TraversalPromise>> {
     //region Constructor
     public DualTraversalPromiseQueryAppender(UniGraph graph, GraphElementSchemaProvider schemaProvider, Optional<Direction> direction) {

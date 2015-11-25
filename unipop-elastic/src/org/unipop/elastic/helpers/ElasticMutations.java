@@ -1,25 +1,27 @@
 package org.unipop.elastic.helpers;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.Client;
+import org.unipop.structure.BaseEdge;
 import org.unipop.structure.BaseElement;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-public class ElasticMutations {
+public class ElasticMutations implements GraphMutations {
 
-    private final TimingAccessor timing;
-    private Client client;
-    private BulkRequestBuilder bulkRequest;
-    private int revision = 0;
-    private boolean isDirty = false;
-    private Set<String> indicesToRefresh = new HashSet<>();
+    protected final TimingAccessor timing;
+    protected Client client;
+    protected BulkRequestBuilder bulkRequest;
+    protected int revision = 0;
+    protected boolean isDirty = false;
+    protected Set<String> indicesToRefresh = new HashSet<>();
 
     public ElasticMutations(Boolean bulk, Client client, TimingAccessor timing) {
         if(bulk) bulkRequest = client.prepareBulk();
@@ -48,7 +50,6 @@ public class ElasticMutations {
         else indexRequest.execute().actionGet();
         revision++;
     }
-
 
     public void updateElement(BaseElement element, String index, String routing, boolean upsert) throws ExecutionException, InterruptedException {
         UpdateRequest updateRequest = new UpdateRequest(index, element.label(), element.id().toString())
