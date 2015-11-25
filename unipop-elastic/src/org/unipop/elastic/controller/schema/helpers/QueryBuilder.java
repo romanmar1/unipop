@@ -252,7 +252,11 @@ public class QueryBuilder implements Cloneable{
         return this;
     }
 
-    public QueryBuilder term(String name, Object value) {
+    public QueryBuilder term(String fieldName, Object value) {
+        return this.term(null, fieldName, value);
+    }
+
+    public QueryBuilder term(String name, String fieldName, Object value) {
         if (this.root == null) {
             throw new UnsupportedOperationException("'term' may not appear as first statement");
         }
@@ -261,7 +265,11 @@ public class QueryBuilder implements Cloneable{
             throw new UnsupportedOperationException("'term' may only appear in the 'filter', 'must', 'mustNot' or 'should' context");
         }
 
-        Composite termComposite = new TermComposite(name, value, current);
+        if (StringUtils.isNotBlank(name) && seekLocalName(current, name) != null) {
+            return this;
+        }
+
+        Composite termComposite = new TermComposite(name, fieldName, value, current);
         this.current.children.add(termComposite);
 
         return this;
@@ -832,8 +840,9 @@ public class QueryBuilder implements Cloneable{
 
     public class TermComposite extends Composite {
         //region Constructor
-        protected TermComposite(String name, Object value, Composite parent) {
+        protected TermComposite(String name, String fieldName, Object value, Composite parent) {
             super(name, Op.term, parent);
+            this.fieldName = fieldName;
             this.value = value;
         }
         //endregion
@@ -841,11 +850,12 @@ public class QueryBuilder implements Cloneable{
         //region Composite Implementation
         @Override
         protected Object build() {
-            return FilterBuilders.termFilter(getName(), this.value);
+            return FilterBuilders.termFilter(fieldName, this.value);
         }
         //endregion
 
         //region Fields
+        private String fieldName;
         private Object value;
         //endregion
     }

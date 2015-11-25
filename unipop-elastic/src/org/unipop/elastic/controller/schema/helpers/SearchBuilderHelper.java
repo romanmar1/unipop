@@ -72,8 +72,5 @@ public class SearchBuilderHelper {
                 }
             }
         }
-
-        searchBuilder.getQueryBuilder().seekRoot().query().filtered().filter().bool().must()
-                .terms("_type", searchBuilder.getTypes());
     }
 }

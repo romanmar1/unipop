@@ -65,6 +65,9 @@ public abstract class SchemaElementController {
         searchBuilder.getQueryBuilder().seekRoot().query().filtered().query().matchAll();
 
         translateLabelsPredicate(Collections.emptyList(), searchBuilder, elementType);
+        searchBuilder.getQueryBuilder().seekRoot().query().filtered().filter().bool().must()
+                .terms("_type", searchBuilder.getTypes());
+
         return searchBuilder;
     }
 

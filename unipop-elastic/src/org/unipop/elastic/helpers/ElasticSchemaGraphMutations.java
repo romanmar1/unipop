@@ -13,6 +13,7 @@ import org.unipop.elastic.controller.schema.SchemaVertex;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphEdgeSchema;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.structure.BaseElement;
+import org.unipop.structure.BaseVertex;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -47,16 +48,49 @@ public class ElasticSchemaGraphMutations extends ElasticMutations {
             return;
         }
 
+        Map<String, Object> inVertexAllFields = ((BaseVertex)schemaEdge.inVertex()).allFields();
+        Map<String, Object> outVertexAllFields = ((BaseVertex)schemaEdge.outVertex()).allFields();
+
         GraphEdgeSchema.Direction originalDirection = optionalEdgeSchema.get().getDirection().get();
 
         Map<String, Object> originalAllFields = schemaEdge.allFields();
         Object originalDirectionValue = originalAllFields.get(originalDirection.getField());
+
+        Map<String, Object> otherFields = new HashMap<>(originalAllFields);
         Object otherDirectionValue = originalDirection.getInValue() == originalDirectionValue ?
                 originalDirection.getOutValue() :
                 originalDirection.getInValue();
-
-        Map<String, Object> otherFields = new HashMap<>(originalAllFields);
         otherFields.put(originalDirection.getField(), otherDirectionValue);
+
+        GraphEdgeSchema.End originalSourceEnd;
+        GraphEdgeSchema.End originalDestinationEnd;
+        if (originalDirectionValue == originalDirection.getOutValue()) {
+            originalSourceEnd = optionalEdgeSchema.get().getSource().get();
+            originalDestinationEnd = optionalEdgeSchema.get().getDestination().get();
+        } else {
+            originalSourceEnd = optionalEdgeSchema.get().getDestination().get();
+            originalDestinationEnd = optionalEdgeSchema.get().getSource().get();
+        }
+
+        outVertexAllFields.entrySet().forEach(entry -> {
+            originalAllFields.put(originalSourceEnd.getEdgeRedundancy().get()
+                    .getRedundantPropertyName(entry.getKey()).get(), entry.getValue());
+        });
+        outVertexAllFields.entrySet().forEach(entry -> {
+            otherFields.put(originalDestinationEnd.getEdgeRedundancy().get()
+                    .getRedundantPropertyName(entry.getKey()).get(), entry.getValue());
+        });
+        inVertexAllFields.entrySet().forEach(entry -> {
+            originalAllFields.put(originalDestinationEnd.getEdgeRedundancy().get()
+                    .getRedundantPropertyName(entry.getKey()).get(), entry.getValue());
+        });
+        inVertexAllFields.entrySet().forEach(entry -> {
+            otherFields.put(originalSourceEnd.getEdgeRedundancy().get()
+                    .getRedundantPropertyName(entry.getKey()).get(), entry.getValue());
+        });
+
+        otherFields.put(originalSourceEnd.getIdField(), schemaEdge.inVertex().id());
+        otherFields.put(originalDestinationEnd.getIdField(), schemaEdge.outVertex().id());
 
         IndexRequestBuilder indexRequest1 = client.prepareIndex(index, element.label(), element.id().toString())
                 .setSource(originalAllFields).setRouting(routing).setCreate(create);
@@ -77,6 +111,7 @@ public class ElasticSchemaGraphMutations extends ElasticMutations {
         revision++;
     }
 
+    @SuppressWarnings("Duplicates")
     @Override
     public void updateElement(BaseElement element, String index, String routing, boolean upsert) throws ExecutionException, InterruptedException {
         // Special implementation is needed just in case of dual edges. In all other cases - use default
@@ -97,16 +132,49 @@ public class ElasticSchemaGraphMutations extends ElasticMutations {
             return;
         }
 
+        Map<String, Object> inVertexAllFields = ((BaseVertex)schemaEdge.inVertex()).allFields();
+        Map<String, Object> outVertexAllFields = ((BaseVertex)schemaEdge.outVertex()).allFields();
+
         GraphEdgeSchema.Direction originalDirection = optionalEdgeSchema.get().getDirection().get();
 
         Map<String, Object> originalAllFields = schemaEdge.allFields();
         Object originalDirectionValue = originalAllFields.get(originalDirection.getField());
+
+        Map<String, Object> otherFields = new HashMap<>(originalAllFields);
         Object otherDirectionValue = originalDirection.getInValue() == originalDirectionValue ?
                 originalDirection.getOutValue() :
                 originalDirection.getInValue();
-
-        Map<String, Object> otherFields = new HashMap<>(originalAllFields);
         otherFields.put(originalDirection.getField(), otherDirectionValue);
+
+        GraphEdgeSchema.End originalSourceEnd;
+        GraphEdgeSchema.End originalDestinationEnd;
+        if (originalDirectionValue == originalDirection.getOutValue()) {
+            originalSourceEnd = optionalEdgeSchema.get().getSource().get();
+            originalDestinationEnd = optionalEdgeSchema.get().getDestination().get();
+        } else {
+            originalSourceEnd = optionalEdgeSchema.get().getDestination().get();
+            originalDestinationEnd = optionalEdgeSchema.get().getSource().get();
+        }
+
+        outVertexAllFields.entrySet().forEach(entry -> {
+            originalAllFields.put(originalSourceEnd.getEdgeRedundancy().get()
+                    .getRedundantPropertyName(entry.getKey()).get(), entry.getValue());
+        });
+        outVertexAllFields.entrySet().forEach(entry -> {
+            otherFields.put(originalDestinationEnd.getEdgeRedundancy().get()
+                    .getRedundantPropertyName(entry.getKey()).get(), entry.getValue());
+        });
+        inVertexAllFields.entrySet().forEach(entry -> {
+            originalAllFields.put(originalDestinationEnd.getEdgeRedundancy().get()
+                    .getRedundantPropertyName(entry.getKey()).get(), entry.getValue());
+        });
+        inVertexAllFields.entrySet().forEach(entry -> {
+            otherFields.put(originalSourceEnd.getEdgeRedundancy().get()
+                    .getRedundantPropertyName(entry.getKey()).get(), entry.getValue());
+        });
+
+        otherFields.put(originalSourceEnd.getIdField(), schemaEdge.inVertex().id());
+        otherFields.put(originalDestinationEnd.getIdField(), schemaEdge.outVertex().id());
 
         UpdateRequest updateRequest1 = new UpdateRequest(index, element.label(), element.id().toString())
                 .doc(originalAllFields).routing(routing);

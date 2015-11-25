@@ -20,10 +20,7 @@ import org.unipop.elastic.controller.schema.helpers.schemaProviders.CachedGraphE
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.DefaultGraphElementSchemaProvider;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProviderFactory;
-import org.unipop.elastic.helpers.ElasticClientFactory;
-import org.unipop.elastic.helpers.ElasticHelper;
-import org.unipop.elastic.helpers.ElasticMutations;
-import org.unipop.elastic.helpers.TimingAccessor;
+import org.unipop.elastic.helpers.*;
 import org.unipop.elastic.controller.promise.helpers.elementConverters.PromiseVertexConverter;
 import org.unipop.structure.UniGraph;
 
@@ -68,7 +65,7 @@ public class PromiseControllerManager extends BasicControllerManager {
         String indexName = configuration.getString("graphName", "graph");
         ElasticHelper.createIndex(indexName, client);
 
-        ElasticMutations elasticMutations = new ElasticMutations(false, client, new TimingAccessor());
+        ElasticMutations elasticMutations = new ElasticSchemaGraphMutations(this.schemaProvider, false, client, new TimingAccessor());
         LazyGetterFactory lazyGetterFactory = new LazyGetterFactory(client, schemaProvider);
 
         this.vertexController = new PromiseVertexController(
@@ -84,16 +81,18 @@ public class PromiseControllerManager extends BasicControllerManager {
 
         this.edgeController = new PromiseEdgeController(
                 graph,
+                this.schemaProvider,
+                this.client,
                 new SchemaEdgeController(
                         graph,
-                        schemaProvider,
-                        client,
+                        this.schemaProvider,
+                        this.client,
                         elasticMutations,
                         elasticConfiguration,
                         new CompositeElementConverter(
                                 CompositeElementConverter.Mode.First,
-                                new SingularEdgeConverter(graph, schemaProvider, elasticMutations, lazyGetterFactory),
-                                new DualEdgeConverter(graph, schemaProvider, elasticMutations, lazyGetterFactory))),
+                                new SingularEdgeConverter(graph, this.schemaProvider, elasticMutations, lazyGetterFactory),
+                                new DualEdgeConverter(graph, this.schemaProvider, elasticMutations, lazyGetterFactory))),
                 new PromiseEdgeConverter(graph));
     }
 

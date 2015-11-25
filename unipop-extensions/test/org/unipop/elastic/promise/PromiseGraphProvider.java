@@ -61,7 +61,7 @@ public class PromiseGraphProvider extends AbstractGraphProvider {
         configuration.setProperty("strategyRegistrar", new BasicStrategyRegistrar());
 
         ElasticGraphConfiguration elasticConfiguration = new ElasticGraphConfiguration(configuration);
-        elasticConfiguration.setElasticGraphSchemaProviderFactory(() -> new ModernGraphElementSchemaProvider(graphName.toLowerCase()));
+        elasticConfiguration.setElasticGraphSchemaProviderFactory(() -> new ModernSimpleGraphElementSchemaProvider(graphName.toLowerCase()));
         elasticConfiguration.setElasticGraphDefaultSearchSize(10000);
         elasticConfiguration.setElasticGraphScrollSize(1000);
         elasticConfiguration.setElasticGraphAggregationsDefaultTermsSize(100000);

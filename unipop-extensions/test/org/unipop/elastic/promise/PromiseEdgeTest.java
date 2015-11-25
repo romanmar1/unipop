@@ -26,7 +26,7 @@ import java.util.stream.StreamSupport;
  */
 @RunWith(GremlinProcessRunner.class)
 public class PromiseEdgeTest extends AbstractGremlinTest {
-    @Test
+   /* @Test
     public void g_E_EmptyGraph() {
         List<Edge> edges = g.E().toList();
 
@@ -48,5 +48,12 @@ public class PromiseEdgeTest extends AbstractGremlinTest {
                     Assert.assertEquals(vertex.id(), ((PromiseVertex)vertex).getPromise().getId());
                 });
 
+    }*/
+
+    @Test
+    @LoadGraphWith(LoadGraphWith.GraphData.MODERN)
+    public void g_V_outE() {
+        List<Edge> edges = g.V().outE().toList();
+        int x = 5;
     }
 }

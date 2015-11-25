@@ -70,7 +70,9 @@ public class SchemaEdge extends BaseEdge {
         }
 
         return !key.equals(schema.get().getSource().get().getIdField()) &&
-                !key.equals(schema.get().getDestination().get().getIdField());
+                !key.equals(schema.get().getDestination().get().getIdField()) &&
+                (!schema.get().getDirection().isPresent() ? true :
+                 !key.equals(schema.get().getDirection().get().getField()));
     }
 
     @Override
@@ -86,6 +88,10 @@ public class SchemaEdge extends BaseEdge {
 
             map.put(source.getIdField(), outVertex.id());
             map.put(dest.getIdField(), inVertex.id());
+
+            if (schema.get().getDirection().isPresent()) {
+                map.put(schema.get().getDirection().get().getField(), schema.get().getDirection().get().getOutValue());
+            }
         }
 
         return map;

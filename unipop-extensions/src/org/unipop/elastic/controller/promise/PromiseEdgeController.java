@@ -3,15 +3,20 @@ package org.unipop.elastic.controller.promise;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.elasticsearch.client.Client;
 import org.unipop.elastic.controller.EdgeController;
 import org.unipop.elastic.controller.Predicates;
-import org.unipop.elastic.controller.schema.helpers.HasContainersQueryTranslator;
-import org.unipop.elastic.controller.schema.helpers.QueryBuilder;
-import org.unipop.elastic.controller.schema.helpers.SearchBuilder;
-import org.unipop.elastic.controller.schema.helpers.TraversalQueryTranslator;
+import org.unipop.elastic.controller.promise.helpers.queryAppenders.*;
+import org.unipop.elastic.controller.schema.helpers.*;
+import org.unipop.elastic.controller.schema.helpers.aggregationConverters.CompositeAggregation;
 import org.unipop.elastic.controller.schema.helpers.elementConverters.ElementConverter;
+import org.unipop.elastic.controller.schema.helpers.queryAppenders.CompositeQueryAppender;
+import org.unipop.elastic.controller.schema.helpers.queryAppenders.QueryAppender;
+import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
+import org.unipop.elastic.helpers.AggregationHelper;
 import org.unipop.structure.BaseEdge;
 import org.unipop.structure.BaseVertex;
 import org.unipop.structure.UniGraph;
@@ -25,17 +30,24 @@ import java.util.stream.StreamSupport;
  */
 public class PromiseEdgeController implements EdgeController {
     //region Constructor
-    public PromiseEdgeController(UniGraph graph, EdgeController innerEdgeController, ElementConverter<Element, Element> elementConverter) {
+    public PromiseEdgeController(
+            UniGraph graph,
+            GraphElementSchemaProvider schemaProvider,
+            Client client,
+            EdgeController innerEdgeController,
+            ElementConverter<Element, Element> elementConverter) {
         this.graph = graph;
         this.innerEdgeController = innerEdgeController;
         this.elementConverter = elementConverter;
+        this.schemaProvider = schemaProvider;
+        this.client = client;
     }
     //endregion
 
     //region EdgeController Implementation
     @Override
     public Iterator<BaseEdge> edges(Predicates predicates) {
-        if (predicates.hasContainers == null || predicates.hasContainers.size() == 0) {
+        /*if (predicates.hasContainers == null || predicates.hasContainers.size() == 0) {
             // promise all edges
             return StreamSupport.stream(Spliterators.spliteratorUnknownSize(this.innerEdgeController.edges(predicates), 0), false)
                     .flatMap(edge -> StreamSupport.stream(this.elementConverter.convert(edge).spliterator(), false))
@@ -60,12 +72,47 @@ public class PromiseEdgeController implements EdgeController {
 
         SearchBuilder searchBuilder = buildEdgePromiseQuery(inHasContainers, outHasContainers, edgeHasContainers);
 
-        return null;
+        return null;*/
+
+        return Collections.emptyIterator();
     }
 
     @Override
     public Iterator<BaseEdge> edges(Vertex[] vertices, Direction direction, String[] edgeLabels, Predicates predicates) {
-        return null;
+        List<HasContainer> predicatesPromiseHasContainers = predicates.hasContainers.stream()
+                .filter(hasContainer -> hasContainer.getKey().toLowerCase().equals(PREDICATES_PROMISE)).collect(Collectors.toList());
+        if (predicatesPromiseHasContainers.size() > 1) {
+            throw new UnsupportedOperationException("Single \"" + PREDICATES_PROMISE + "\" allowed");
+        }
+
+        List<HasContainer> edgeHasContainers = predicates.hasContainers.stream()
+                .filter(hasContainer -> !predicatesPromiseHasContainers.contains(hasContainer)).collect(Collectors.toList());
+
+        SearchBuilder searchBuilder = buildBulkEdgePromiseQuery(
+                getBulkIdPromises(Arrays.stream(vertices).map(PromiseVertex.class::cast).collect(Collectors.toList())),
+                getBulkTraversalPromises(Arrays.stream(vertices).map(PromiseVertex.class::cast).collect(Collectors.toList())),
+                StreamSupport.stream(extractPromises(predicatesPromiseHasContainers).spliterator(), false)
+                    .map(TraversalPromise.class::cast).collect(Collectors.toList()),
+                edgeLabels,
+                edgeHasContainers,
+                direction);
+
+        // search builder will be null if the appender failed to append query on the current bulk
+        if (searchBuilder == null) {
+            return Collections.emptyIterator();
+        }
+
+        SearchAggregationIterable aggregations = new SearchAggregationIterable(
+                this.graph,
+                searchBuilder.getSearchRequest(this.client),
+                this.client);
+        CompositeAggregation compositeAggregation = new CompositeAggregation(null, aggregations);
+
+        Map<String, Object> result =
+                AggregationHelper.getAggregationConverter(searchBuilder.getAggregationBuilder(), false)
+                .convert(compositeAggregation);
+
+        return Collections.emptyIterator();
     }
 
     @Override
@@ -95,12 +142,36 @@ public class PromiseEdgeController implements EdgeController {
     //endregion
 
     //region Private Methods
+    private SearchBuilder buildBulkEdgePromiseQuery(
+            Iterable<IdPromise> bulkIdPromises,
+            Iterable<TraversalPromise> bulkTraversalPromises,
+            Iterable<TraversalPromise> traversalPromisesPredicates,
+            String[] edgeLabels,
+            Iterable<HasContainer> edgeHasContainers,
+            Direction direction) {
+        SearchBuilder searchBuilder = buildPromiseEdgePredicatesQuery(edgeHasContainers, edgeLabels);
+
+        PromiseBulkInput promiseBulkInput = new PromiseBulkInput(
+                bulkIdPromises,
+                bulkTraversalPromises,
+                traversalPromisesPredicates,
+                searchBuilder.getTypes(),
+                searchBuilder);
+
+        QueryAppender<PromiseBulkInput> queryAppender = getQueryAppender(direction);
+        if (!queryAppender.append(promiseBulkInput)) {
+            return null;
+        }
+
+        return searchBuilder;
+    }
+
     private SearchBuilder buildEdgePromiseQuery(
             Iterable<HasContainer> outPromiseHasContainers,
             Iterable<HasContainer> inPromiseHasContainers,
             Iterable<HasContainer> edgeHasContainers) {
 
-        SearchBuilder searchBuilder = new SearchBuilder();
+        /*SearchBuilder searchBuilder = new SearchBuilder();
         buildPromiseEdgePredicatesQuery(searchBuilder, edgeHasContainers);
 
         // build first level of aggregation
@@ -115,26 +186,29 @@ public class PromiseEdgeController implements EdgeController {
         Iterable<TraversalPromise> inTraversalPromises = getTraversalPromises(outPromises);
         buildPromiseEdgeAggregationInQuery(searchBuilder, inIdPromises, inTraversalPromises);
 
-        return searchBuilder;
+        return searchBuilder;*/
+        return null;
     }
 
-    private List<TraversalPromise> getTraversalPromises(Iterable<Promise> outPromises) {
+    private List<TraversalPromise> getBulkTraversalPromises(Iterable<PromiseVertex> outPromises) {
         return StreamSupport.stream(outPromises.spliterator(), false)
+                .map(vertex -> vertex.getPromise())
                 .filter(promise -> promise instanceof TraversalPromise)
                 .map(TraversalPromise.class::cast)
                 .collect(Collectors.toList());
     }
 
-    private Iterable<IdPromise> getIdPromises(Iterable<Promise> outPromises) {
+    private Iterable<IdPromise> getBulkIdPromises(Iterable<PromiseVertex> outPromises) {
         return StreamSupport.stream(outPromises.spliterator(), false)
-                    .filter(promise -> promise instanceof IdPromise)
-                    .map(IdPromise.class::cast)
-                    .collect(Collectors.toList());
+                .map(vertex -> vertex.getPromise())
+                .filter(promise -> promise instanceof IdPromise)
+                .map(IdPromise.class::cast)
+                .collect(Collectors.toList());
     }
 
     private Iterable<Promise> extractPromises(Iterable<HasContainer> hasContainers) {
         return StreamSupport.stream(hasContainers.spliterator(), false)
-                .filter(hasContainer -> Arrays.asList(IN_PROMISE, OUT_PROMISE).contains(hasContainer.getKey().toLowerCase()))
+                .filter(hasContainer -> Arrays.asList(IN_PROMISE, OUT_PROMISE, PREDICATES_PROMISE).contains(hasContainer.getKey().toLowerCase()))
                 .flatMap(hasContainer -> {
                     if (Promise.class.isAssignableFrom(hasContainer.getValue().getClass())) {
                         return Arrays.asList((Promise)hasContainer.getValue()).stream();
@@ -148,9 +222,12 @@ public class PromiseEdgeController implements EdgeController {
                 }).collect(Collectors.toList());
     }
 
-    private void buildPromiseEdgePredicatesQuery(SearchBuilder searchBuilder, Iterable<HasContainer> edgeHasContainers) {
+    private SearchBuilder buildPromiseEdgePredicatesQuery(Iterable<HasContainer> edgeHasContainers, String[] edgeLabels) {
+        SearchBuilder searchBuilder = new SearchBuilder();
         searchBuilder.getQueryBuilder().seekRoot().query().filtered().query().matchAll();
         translateHasContainers(searchBuilder, edgeHasContainers);
+        translateLabelsPredicate(Arrays.stream(edgeLabels).collect(Collectors.toList()), searchBuilder, Edge.class);
+        return searchBuilder;
     }
 
     protected void translateHasContainers(SearchBuilder searchBuilder, Iterable<HasContainer> hasContainers) {
@@ -192,13 +269,59 @@ public class PromiseEdgeController implements EdgeController {
             Iterable<TraversalPromise> inTraversalPromises) {
 
     }
+
+    @SuppressWarnings("Duplicates")
+    private Map<Class, List<Promise>> getPartionedPromiseMapByClass(Iterable<PromiseVertex> vertices) {
+        return StreamSupport.stream(vertices.spliterator(), false)
+                .collect(Collectors.toMap(
+                        vertex -> vertex.getPromise().getClass(),
+                        vertex -> new ArrayList<>(Arrays.asList(vertex.getPromise())),
+                        (list1, list2) -> {
+                            if (list1.size() > list2.size()) {
+                                list1.addAll(list2);
+                                return list1;
+                            } else {
+                                list2.addAll(list1);
+                                return list2;
+                            }
+                        }));
+    }
+
+    private QueryAppender<PromiseBulkInput> getQueryAppender(Direction direction) {
+        return new PromiseBulkQueryAppender(
+                this.graph,
+                this.schemaProvider,
+                Optional.of(Direction.OUT),
+                new CompositeQueryAppender<PromiseTypesBulkInput<IdPromise>>(
+                        CompositeQueryAppender.Mode.First,
+                        new DualIdPromiseQueryAppender(this.graph, this.schemaProvider, Optional.of(direction))),
+                new CompositeQueryAppender<PromiseTypesBulkInput<TraversalPromise>>(
+                        CompositeQueryAppender.Mode.First,
+                        new DualTraversalPromiseQueryAppender(this.graph, this.schemaProvider, Optional.of(direction))));
+
+    }
+
+    @SuppressWarnings("Duplicates")
+    private void translateLabelsPredicate(Iterable<String> labels, SearchBuilder searchBuilder, Class elementType) {
+        if (labels != null && StreamSupport.stream(labels.spliterator(), false).count() > 0) {
+            SearchBuilderHelper.applyIndices(searchBuilder, schemaProvider, labels, elementType);
+            SearchBuilderHelper.applyTypes(searchBuilder, schemaProvider, labels, elementType);
+        } else {
+            SearchBuilderHelper.applyIndices(searchBuilder, schemaProvider, elementType);
+            SearchBuilderHelper.applyTypes(searchBuilder, schemaProvider, elementType);
+        }
+    }
     //endregion
 
     //region Fields
     private UniGraph graph;
     private EdgeController innerEdgeController;
     private ElementConverter<Element, Element> elementConverter;
-    private final String IN_PROMISE = "inpromise";
-    private final String OUT_PROMISE = "outpromise";
+    private GraphElementSchemaProvider schemaProvider;
+    private Client client;
+
+    private final String IN_PROMISE = "in_promise";
+    private final String OUT_PROMISE = "out_promise";
+    private final String PREDICATES_PROMISE = "predicates_promise";
     //endregion
 }

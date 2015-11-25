@@ -220,6 +220,9 @@ public class SchemaEdgeController extends SchemaElementController implements Edg
         searchBuilder.setLimit(configuration.getElasticGraphDefaultSearchSize());
 
         translateLabelsPredicate(Arrays.asList(edgeLabels), searchBuilder, Edge.class);
+        searchBuilder.getQueryBuilder().seekRoot().query().filtered().filter().bool().must()
+                .terms("_type", searchBuilder.getTypes());
+
         translateHasContainers(searchBuilder, predicates.hasContainers);
         translateLimits(predicates.limitHigh, searchBuilder);
         return searchBuilder;
