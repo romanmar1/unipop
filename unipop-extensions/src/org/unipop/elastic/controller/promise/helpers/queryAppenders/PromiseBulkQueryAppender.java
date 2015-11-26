@@ -3,6 +3,7 @@ package org.unipop.elastic.controller.promise.helpers.queryAppenders;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.unipop.elastic.controller.promise.IdPromise;
 import org.unipop.elastic.controller.promise.TraversalPromise;
+import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
 import org.unipop.elastic.controller.schema.helpers.queryAppenders.GraphQueryAppenderBase;
 import org.unipop.elastic.controller.schema.helpers.queryAppenders.QueryAppender;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphEdgeSchema;
@@ -71,8 +72,9 @@ public class PromiseBulkQueryAppender extends GraphQueryAppenderBase<PromiseBulk
             for(GraphEdgeSchema edgeSchema : getAllEdgeSchemasFromTypes(input.getTypesToQuery())) {
 
                 input.getSearchBuilder().getQueryBuilder().seekRoot().query().filtered().filter()
-                        .bool("typesFilter").should().bool(edgeSchema.getType())
-                        .must().term(edgeSchema.getType() + "Type", "_type", edgeSchema.getType());
+                        .bool().must(PromiseStringConstants.PROMISES_AND_TYPES_FILTER).bool("typesFilter")
+                        .should().bool(edgeSchema.getType()).must()
+                        .term(edgeSchema.getType() + "Type", "_type", edgeSchema.getType());
 
                 // in case of dual edge schema, add to each type the relevant direction (unless it's BOTH)
                 if (edgeSchema.getDirection().isPresent()) {

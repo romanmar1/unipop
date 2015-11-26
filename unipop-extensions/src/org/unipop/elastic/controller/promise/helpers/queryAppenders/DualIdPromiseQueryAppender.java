@@ -69,8 +69,14 @@ public class DualIdPromiseQueryAppender extends DualPromiseQueryAppenderBase<Pro
             return false;
         }
 
-        // aggregation layer 1
         QueryBuilder idPromiseQueryBuilder = buildPromiseQueryFilter(input.getPromises(), edgeSchema.get());
+
+        // Add the promise query builder as a filter to the query
+        input.getSearchBuilder().getQueryBuilder().seekRoot().query().filtered().filter()
+                .bool().must(PromiseStringConstants.PROMISES_AND_TYPES_FILTER)
+                .bool(PromiseStringConstants.PROMISES_FILTER).should().queryBuilderFilter(typeToQuery + "Ids", idPromiseQueryBuilder);
+
+        // aggregation layer 1
         input.getSearchBuilder().getAggregationBuilder().seekRoot().filters(PromiseStringConstants.BULK_ID_PROMISES)
                 // filtering relevant data to aggregate
                 .filter(firstIdPromise.getLabel(), idPromiseQueryBuilder).seek(PromiseStringConstants.BULK_ID_PROMISES)
@@ -78,7 +84,6 @@ public class DualIdPromiseQueryAppender extends DualPromiseQueryAppenderBase<Pro
                 .terms(edgeSchema.get().getSource().get().getIdField())
                 .field(edgeSchema.get().getSource().get().getIdField())
                 .size(0).shardSize(0).executionHint(ExecutionHintStrings.GLOBAL_ORIDNAL_HASH);
-
 
         // aggregation layer 2 - if TraversalPredicates exist
         if (input.getTraversalPromisesPredicates() != null &&

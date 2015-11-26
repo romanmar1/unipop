@@ -7,11 +7,10 @@ import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilders;
+
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
@@ -388,6 +387,21 @@ public class QueryBuilder implements Cloneable{
         return this;
     }
 
+    public QueryBuilder queryBuilderFilter(QueryBuilder queryBuilder) {
+        return this.queryBuilderFilter(null, queryBuilder);
+    }
+
+    public QueryBuilder queryBuilderFilter(String name, QueryBuilder queryBuilder) {
+        if (this.root == null) {
+            throw new UnsupportedOperationException("'queryBuilderFilter' (the filter of a QueryBuilder) may not appear as first statement");
+        }
+
+        Composite queryBuilderFilterComposite = new QueryBuilderFilterComposite(name, current, queryBuilder);
+        this.current.children.add(queryBuilderFilterComposite);
+
+        return this;
+    }
+
     public QueryBuilder seek(String name) {
         return seek(composite -> {
             if (composite == null) {
@@ -701,6 +715,34 @@ public class QueryBuilder implements Cloneable{
         private Composite parent;
 
         private List<Composite> children;
+        //endregion
+    }
+
+    public class QueryBuilderFilterComposite extends Composite {
+        //region Constructor
+        public QueryBuilderFilterComposite(String name, Composite parent, QueryBuilder queryBuilder) {
+            super(name, Op.filter, parent);
+            this.queryBuilder = queryBuilder;
+        }
+        //endregion
+
+        //region Composite Implementation
+        @Override
+        public Object build() {
+            return this.queryBuilder.seekRoot().query().filtered().filter().getCurrent().build();
+        }
+
+        @Override
+        protected Composite clone() throws CloneNotSupportedException {
+            QueryBuilderFilterComposite clone = (QueryBuilderFilterComposite) super.clone();
+            clone.queryBuilder = this.queryBuilder.clone();
+
+            return clone;
+        }
+        //endregion
+
+        //region Fields
+        private QueryBuilder queryBuilder;
         //endregion
     }
 

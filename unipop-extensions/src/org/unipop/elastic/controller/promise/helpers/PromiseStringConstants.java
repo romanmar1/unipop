@@ -8,4 +8,6 @@ public class PromiseStringConstants {
     public static final String BULK_ID_PROMISES = "BULK_ID_PROMISES";
     public static final String PREDICATES_PROMISES = "PREDICATES_PROMISES";
     public static final String PROMISE_SCHEMAS_ROOT = "PROMISE_SCHEMAS_ROOT";
+    public static final String PROMISES_AND_TYPES_FILTER = "PROMISES_AND_TYPES_FILTER";
+    public static final String PROMISES_FILTER = "PROMISES_FILTER";
 }

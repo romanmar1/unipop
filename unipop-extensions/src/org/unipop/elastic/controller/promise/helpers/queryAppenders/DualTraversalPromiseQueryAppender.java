@@ -51,7 +51,6 @@ public class DualTraversalPromiseQueryAppender extends DualPromiseQueryAppenderB
             return false;
         }
 
-        // aggregation layer 1
         StreamSupport.stream(input.getPromises().spliterator(), false).forEach(traversalPromise -> {
             QueryBuilder traversalPromiseQueryBuilder = super.buildPromiseQuery(
                     traversalPromise,
@@ -59,6 +58,12 @@ public class DualTraversalPromiseQueryAppender extends DualPromiseQueryAppenderB
                     edgeSchemas,
                     edgeSchema -> edgeSchema.getSource().get());
 
+            // Add the promise query builder as a filter to the query
+            input.getSearchBuilder().getQueryBuilder().seekRoot().query().filtered().filter()
+                    .bool().must(PromiseStringConstants.PROMISES_AND_TYPES_FILTER)
+                    .bool(PromiseStringConstants.PROMISES_FILTER).should().queryBuilderFilter(traversalPromiseQueryBuilder);
+
+            // aggregation layer 1
             input.getSearchBuilder().getAggregationBuilder().seekRoot().filters(PromiseStringConstants.BULK_TRAVERSAL_PROMISES)
                     .filter(traversalPromise.getId().toString(), traversalPromiseQueryBuilder);
         });
