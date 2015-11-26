@@ -3,15 +3,21 @@ package org.unipop.elastic.promise;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Direction;
-import org.apache.tinkerpop.shaded.kryo.serializers.FieldSerializer;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.ImmutableSettings;
+import org.junit.Before;
 import org.junit.Test;
 import org.unipop.elastic.controller.promise.IdPromise;
 import org.unipop.elastic.controller.promise.TraversalPromise;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.*;
+import org.unipop.elastic.controller.promise.helpers.queryAppenders.dual.DualIdPromiseAggregationQueryAppender;
+import org.unipop.elastic.controller.promise.helpers.queryAppenders.dual.DualIdPromiseQueryAppender;
+import org.unipop.elastic.controller.promise.helpers.queryAppenders.dual.DualTraversalPromiseAggregationQueryAppender;
+import org.unipop.elastic.controller.promise.helpers.queryAppenders.dual.DualTraversalPromiseQueryAppender;
+import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.*;
 import org.unipop.elastic.controller.schema.helpers.SearchBuilder;
 import org.unipop.elastic.controller.schema.helpers.queryAppenders.CompositeQueryAppender;
+import org.unipop.elastic.controller.schema.helpers.queryAppenders.QueryAppender;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.*;
 
 import java.util.Arrays;
@@ -23,19 +29,28 @@ import java.util.stream.StreamSupport;
  * Created by Roman on 11/24/2015.
  */
 public class PromiseAppenderTest {
-    @Test
-    public void SingleTraversalPromiseAppenderTest() {
-        PromiseBulkQueryAppender promiseBulkQueryAppender = new PromiseBulkQueryAppender(
+    @Before
+    public void setup() {
+        QueryBuilderFactory<TraversalPromiseEdgeInput> traversalPromiseQueryBuilderFactory = new CachedTraversalPromiseEdgeQueryBuilderFactory<>(
+                new TraversalPromiseEdgeQueryBuilderFactory()
+        );
+
+        QueryBuilderFactory<IdPromiseEdgeInput> idPromiseQueryBuilderFactory = new IdPromiseEdgeQueryBuilderFactory();
+
+        this.queryAppender = new PromiseBulkQueryAppender(
                 null,
                 new SimpleSchemaProvider(),
                 Optional.of(Direction.OUT),
-                new CompositeQueryAppender<PromiseTypesBulkInput<IdPromise>>(
-                        CompositeQueryAppender.Mode.First,
-                        new DualIdPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT))),
-                new CompositeQueryAppender<PromiseTypesBulkInput<TraversalPromise>>(
-                        CompositeQueryAppender.Mode.First,
-                        new DualTraversalPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT))));
+                new CompositeQueryAppender<PromiseBulkInput>(
+                        CompositeQueryAppender.Mode.All,
+                        new DualIdPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT), idPromiseQueryBuilderFactory, traversalPromiseQueryBuilderFactory),
+                        new DualIdPromiseAggregationQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT), idPromiseQueryBuilderFactory, traversalPromiseQueryBuilderFactory),
+                        new DualTraversalPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT), traversalPromiseQueryBuilderFactory),
+                        new DualTraversalPromiseAggregationQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT), traversalPromiseQueryBuilderFactory)));
+    }
 
+    @Test
+    public void SingleTraversalPromiseAppenderTest() {
         SearchBuilder searchBuilder = new SearchBuilder();
         PromiseBulkInput input = new PromiseBulkInput(
                 Collections.<IdPromise>emptyList(),
@@ -44,7 +59,7 @@ public class PromiseAppenderTest {
                 Arrays.asList("edge1"),
                 searchBuilder);
 
-        promiseBulkQueryAppender.append(input);
+        this.queryAppender.append(input);
 
         String query = searchBuilder.getSearchRequest(new TransportClient(ImmutableSettings.settingsBuilder().put("cluster.name", "test").put("client.transport.sniff", true).build())).toString();
         int x = 5;
@@ -52,17 +67,6 @@ public class PromiseAppenderTest {
 
     @Test
     public void MultipleTraversalPromiseAppenderTest() {
-        PromiseBulkQueryAppender promiseBulkQueryAppender = new PromiseBulkQueryAppender(
-                null,
-                new SimpleSchemaProvider(),
-                Optional.of(Direction.OUT),
-                new CompositeQueryAppender<PromiseTypesBulkInput<IdPromise>>(
-                        CompositeQueryAppender.Mode.First,
-                        new DualIdPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT))),
-                new CompositeQueryAppender<PromiseTypesBulkInput<TraversalPromise>>(
-                        CompositeQueryAppender.Mode.First,
-                        new DualTraversalPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT))));
-
         SearchBuilder searchBuilder = new SearchBuilder();
         PromiseBulkInput input = new PromiseBulkInput(
                 Collections.<IdPromise>emptyList(),
@@ -74,7 +78,7 @@ public class PromiseAppenderTest {
                 Arrays.asList("edge1"),
                 searchBuilder);
 
-        promiseBulkQueryAppender.append(input);
+        this.queryAppender.append(input);
 
         String query = searchBuilder.getSearchRequest(new TransportClient(ImmutableSettings.settingsBuilder().put("cluster.name", "test").put("client.transport.sniff", true).build())).toString();
         int x = 5;
@@ -82,17 +86,6 @@ public class PromiseAppenderTest {
 
     @Test
     public void MultipleTraversalPromiseAppenderWithPredicatesTest() {
-        PromiseBulkQueryAppender promiseBulkQueryAppender = new PromiseBulkQueryAppender(
-                null,
-                new SimpleSchemaProvider(),
-                Optional.of(Direction.OUT),
-                new CompositeQueryAppender<PromiseTypesBulkInput<IdPromise>>(
-                        CompositeQueryAppender.Mode.First,
-                        new DualIdPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT))),
-                new CompositeQueryAppender<PromiseTypesBulkInput<TraversalPromise>>(
-                        CompositeQueryAppender.Mode.First,
-                        new DualTraversalPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT))));
-
         SearchBuilder searchBuilder = new SearchBuilder();
         PromiseBulkInput input = new PromiseBulkInput(
                 Collections.<IdPromise>emptyList(),
@@ -107,7 +100,7 @@ public class PromiseAppenderTest {
                 Arrays.asList("edge1"),
                 searchBuilder);
 
-        promiseBulkQueryAppender.append(input);
+        this.queryAppender.append(input);
 
         String query = searchBuilder.getSearchRequest(new TransportClient(ImmutableSettings.settingsBuilder().put("cluster.name", "test").put("client.transport.sniff", true).build())).toString();
         int x = 5;
@@ -115,26 +108,15 @@ public class PromiseAppenderTest {
 
     @Test
     public void SingleIdPromiseAppenderTest() {
-        PromiseBulkQueryAppender promiseBulkQueryAppender = new PromiseBulkQueryAppender(
-                null,
-                new SimpleSchemaProvider(),
-                Optional.of(Direction.OUT),
-                new CompositeQueryAppender<PromiseTypesBulkInput<IdPromise>>(
-                        CompositeQueryAppender.Mode.First,
-                        new DualIdPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT))),
-                new CompositeQueryAppender<PromiseTypesBulkInput<TraversalPromise>>(
-                        CompositeQueryAppender.Mode.First,
-                        new DualTraversalPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT))));
-
         SearchBuilder searchBuilder = new SearchBuilder();
         PromiseBulkInput input = new PromiseBulkInput(
-                Arrays.asList(new IdPromise(666, "vertex")),
+                Arrays.asList(new IdPromise(666)),
                 Collections.<TraversalPromise>emptyList(),
                 Collections.<TraversalPromise>emptyList(),
                 Arrays.asList("edge1"),
                 searchBuilder);
 
-        promiseBulkQueryAppender.append(input);
+        this.queryAppender.append(input);
 
         String query = searchBuilder.getSearchRequest(new TransportClient(ImmutableSettings.settingsBuilder().put("cluster.name", "test").put("client.transport.sniff", true).build())).toString();
         int x = 5;
@@ -143,26 +125,15 @@ public class PromiseAppenderTest {
 
     @Test
     public void MultipleIdPromiseAppenderTest() {
-        PromiseBulkQueryAppender promiseBulkQueryAppender = new PromiseBulkQueryAppender(
-                null,
-                new SimpleSchemaProvider(),
-                Optional.of(Direction.OUT),
-                new CompositeQueryAppender<PromiseTypesBulkInput<IdPromise>>(
-                        CompositeQueryAppender.Mode.First,
-                        new DualIdPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT))),
-                new CompositeQueryAppender<PromiseTypesBulkInput<TraversalPromise>>(
-                        CompositeQueryAppender.Mode.First,
-                        new DualTraversalPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT))));
-
         SearchBuilder searchBuilder = new SearchBuilder();
         PromiseBulkInput input = new PromiseBulkInput(
-                Arrays.asList(new IdPromise(666, "vertex"), new IdPromise(123, "vertex"), new IdPromise(888, "vertex")),
+                Arrays.asList(new IdPromise(666), new IdPromise(123), new IdPromise(888)),
                 Collections.<TraversalPromise>emptyList(),
                 Collections.<TraversalPromise>emptyList(),
                 Arrays.asList("edge1"),
                 searchBuilder);
 
-        promiseBulkQueryAppender.append(input);
+        this.queryAppender.append(input);
 
         String query = searchBuilder.getSearchRequest(new TransportClient(ImmutableSettings.settingsBuilder().put("cluster.name", "test").put("client.transport.sniff", true).build())).toString();
         int x = 5;
@@ -171,20 +142,9 @@ public class PromiseAppenderTest {
 
     @Test
     public void MultipleIdPromiseAppenderWithPredicatesTest() {
-        PromiseBulkQueryAppender promiseBulkQueryAppender = new PromiseBulkQueryAppender(
-                null,
-                new SimpleSchemaProvider(),
-                Optional.of(Direction.OUT),
-                new CompositeQueryAppender<PromiseTypesBulkInput<IdPromise>>(
-                        CompositeQueryAppender.Mode.First,
-                        new DualIdPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT))),
-                new CompositeQueryAppender<PromiseTypesBulkInput<TraversalPromise>>(
-                        CompositeQueryAppender.Mode.First,
-                        new DualTraversalPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT))));
-
         SearchBuilder searchBuilder = new SearchBuilder();
         PromiseBulkInput input = new PromiseBulkInput(
-                Arrays.asList(new IdPromise(666, "vertex"), new IdPromise(123, "vertex"), new IdPromise(888, "vertex")),
+                Arrays.asList(new IdPromise(666), new IdPromise(123), new IdPromise(888)),
                 Collections.<TraversalPromise>emptyList(),
                 Arrays.asList(
                         new TraversalPromise("roman", __.has("age", P.eq(31))),
@@ -193,7 +153,7 @@ public class PromiseAppenderTest {
                 Arrays.asList("edge1"),
                 searchBuilder);
 
-        promiseBulkQueryAppender.append(input);
+        this.queryAppender.append(input);
 
         String query = searchBuilder.getSearchRequest(new TransportClient(ImmutableSettings.settingsBuilder().put("cluster.name", "test").put("client.transport.sniff", true).build())).toString();
         int x = 5;
@@ -201,27 +161,16 @@ public class PromiseAppenderTest {
 
     @Test
     public void SingleIdAndSingleTraversalPromiseAppenderTest() {
-        PromiseBulkQueryAppender promiseBulkQueryAppender = new PromiseBulkQueryAppender(
-                null,
-                new SimpleSchemaProvider(),
-                Optional.of(Direction.OUT),
-                new CompositeQueryAppender<PromiseTypesBulkInput<IdPromise>>(
-                        CompositeQueryAppender.Mode.First,
-                        new DualIdPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT))),
-                new CompositeQueryAppender<PromiseTypesBulkInput<TraversalPromise>>(
-                        CompositeQueryAppender.Mode.First,
-                        new DualTraversalPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT))));
-
         SearchBuilder searchBuilder = new SearchBuilder();
         PromiseBulkInput input = new PromiseBulkInput(
-                Arrays.asList(new IdPromise(666, "vertex")),
+                Arrays.asList(new IdPromise(666)),
                 Arrays.asList(
                         new TraversalPromise("roman", __.has("age", P.eq(31)))),
                 Collections.<TraversalPromise>emptyList(),
                 Arrays.asList("edge1"),
                 searchBuilder);
 
-        promiseBulkQueryAppender.append(input);
+        this.queryAppender.append(input);
 
         String query = searchBuilder.getSearchRequest(new TransportClient(ImmutableSettings.settingsBuilder().put("cluster.name", "test").put("client.transport.sniff", true).build())).toString();
         int x = 5;
@@ -229,20 +178,9 @@ public class PromiseAppenderTest {
 
     @Test
     public void IdsAndTraversalsPromiseAppenderTest() {
-        PromiseBulkQueryAppender promiseBulkQueryAppender = new PromiseBulkQueryAppender(
-                null,
-                new SimpleSchemaProvider(),
-                Optional.of(Direction.OUT),
-                new CompositeQueryAppender<PromiseTypesBulkInput<IdPromise>>(
-                        CompositeQueryAppender.Mode.First,
-                        new DualIdPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT))),
-                new CompositeQueryAppender<PromiseTypesBulkInput<TraversalPromise>>(
-                        CompositeQueryAppender.Mode.First,
-                        new DualTraversalPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT))));
-
         SearchBuilder searchBuilder = new SearchBuilder();
         PromiseBulkInput input = new PromiseBulkInput(
-                Arrays.asList(new IdPromise(666, "vertex"), new IdPromise(123, "vertex"), new IdPromise(888, "vertex")),
+                Arrays.asList(new IdPromise(666), new IdPromise(123), new IdPromise(888)),
                 Arrays.asList(
                         new TraversalPromise("roman", __.has("age", P.eq(31))),
                         new TraversalPromise("karni", __.or(__.has("age", P.eq(31)), __.has("name", P.eq("gilad")), __.not(__.has("hair")))),
@@ -251,7 +189,7 @@ public class PromiseAppenderTest {
                 Arrays.asList("edge1"),
                 searchBuilder);
 
-        promiseBulkQueryAppender.append(input);
+        this.queryAppender.append(input);
 
         String query = searchBuilder.getSearchRequest(new TransportClient(ImmutableSettings.settingsBuilder().put("cluster.name", "test").put("client.transport.sniff", true).build())).toString();
         int x = 5;
@@ -260,20 +198,9 @@ public class PromiseAppenderTest {
 
     @Test
     public void IdsAndTraversalsPromiseAppenderWithPredicatesTest() {
-        PromiseBulkQueryAppender promiseBulkQueryAppender = new PromiseBulkQueryAppender(
-                null,
-                new SimpleSchemaProvider(),
-                Optional.of(Direction.OUT),
-                new CompositeQueryAppender<PromiseTypesBulkInput<IdPromise>>(
-                        CompositeQueryAppender.Mode.First,
-                        new DualIdPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT))),
-                new CompositeQueryAppender<PromiseTypesBulkInput<TraversalPromise>>(
-                        CompositeQueryAppender.Mode.First,
-                        new DualTraversalPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT))));
-
         SearchBuilder searchBuilder = new SearchBuilder();
         PromiseBulkInput input = new PromiseBulkInput(
-                Arrays.asList(new IdPromise(666, "vertex"), new IdPromise(123, "vertex"), new IdPromise(888, "vertex")),
+                Arrays.asList(new IdPromise(666), new IdPromise(123), new IdPromise(888)),
                 Arrays.asList(
                         new TraversalPromise("roman", __.has("age", P.eq(31))),
                         new TraversalPromise("karni", __.or(__.has("age", P.eq(31)), __.has("name", P.eq("gilad")), __.not(__.has("hair")))),
@@ -285,12 +212,15 @@ public class PromiseAppenderTest {
                 Arrays.asList("edge1"),
                 searchBuilder);
 
-        promiseBulkQueryAppender.append(input);
+        this.queryAppender.append(input);
 
         String query = searchBuilder.getSearchRequest(new TransportClient(ImmutableSettings.settingsBuilder().put("cluster.name", "test").put("client.transport.sniff", true).build())).toString();
         int x = 5;
     }
 
+    //region Fields
+    private QueryAppender<PromiseBulkInput> queryAppender;
+    //endregion
 
 
     public class SimpleSchemaProvider implements GraphElementSchemaProvider {
@@ -348,7 +278,7 @@ public class PromiseAppenderTest {
                     return Optional.of(new End() {
                         @Override
                         public String getIdField() {
-                            return "vertexIdA";
+                            return "sourceId";
                         }
 
                         @Override
@@ -358,7 +288,7 @@ public class PromiseAppenderTest {
 
                         @Override
                         public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
-                            return Optional.of(new PrefixedEdgeRedundancy("vertexA."));
+                            return Optional.of(new PrefixedEdgeRedundancy("source."));
                         }
                     });
                 }
@@ -368,7 +298,7 @@ public class PromiseAppenderTest {
                     return Optional.of(new End() {
                         @Override
                         public String getIdField() {
-                            return "vertexIdB";
+                            return "destinationId";
                         }
 
                         @Override
@@ -378,7 +308,7 @@ public class PromiseAppenderTest {
 
                         @Override
                         public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
-                            return Optional.of(new PrefixedEdgeRedundancy("vertexB."));
+                            return Optional.of(new PrefixedEdgeRedundancy("destination."));
                         }
                     });
                 }

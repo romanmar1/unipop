@@ -199,7 +199,7 @@ public class SchemaEdgeController extends SchemaElementController implements Edg
             @Override
             public Set<String> apply(QueryBuilder.Composite composite, Set<String> strings) {
                 if (composite.getOp() == QueryBuilder.Op.term || composite.getOp() == QueryBuilder.Op.terms) {
-                    strings.add(composite.getName());
+                    strings.add(((QueryBuilder.FieldComposite)composite).getFieldName());
                 }
                 return strings;
             }

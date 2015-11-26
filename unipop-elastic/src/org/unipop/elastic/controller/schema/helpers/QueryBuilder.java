@@ -31,7 +31,8 @@ public class QueryBuilder implements Cloneable{
         range,
         ids,
         type,
-        exists
+        exists,
+        queryBuilderFilter
     }
 
     private enum SeekMode {
@@ -274,7 +275,11 @@ public class QueryBuilder implements Cloneable{
         return this;
     }
 
-    public QueryBuilder terms(String name, Object value) {
+    public QueryBuilder terms(String fieldName, Object value) {
+        return this.terms(null, fieldName, value);
+    }
+
+    public QueryBuilder terms(String name, String fieldName, Object value) {
         if (this.root == null) {
             throw new UnsupportedOperationException("'terms' may not appear as first statement");
         }
@@ -287,13 +292,21 @@ public class QueryBuilder implements Cloneable{
             throw new IllegalArgumentException("illegal value argument for 'terms': " + value.getClass().getSimpleName());
         }
 
-        Composite termComposite = new TermsComposite(name, value, current);
+        if (StringUtils.isNotBlank(name) && seekLocalName(current, name) != null) {
+            return this;
+        }
+
+        Composite termComposite = new TermsComposite(name, fieldName, value, current);
         this.current.children.add(termComposite);
 
         return this;
     }
 
-    public QueryBuilder range(String name, Compare compare, Object value) {
+    public QueryBuilder range(String fieldName, Compare compare, Object value) {
+        return this.range(null, fieldName, compare, value);
+    }
+
+    public QueryBuilder range(String name, String fieldName, Compare compare, Object value) {
         if (this.root == null) {
             throw new UnsupportedOperationException("'range' may not appear as first statement");
         }
@@ -302,13 +315,21 @@ public class QueryBuilder implements Cloneable{
             throw new UnsupportedOperationException("'range' may only appear in the 'filter', 'must', 'mustNot' or 'should' context");
         }
 
-        Composite rangeComposite = new RangeComposite(new HasContainer(name, new P(compare, value)), current);
+        if (StringUtils.isNotBlank(name) && seekLocalName(current, name) != null) {
+            return this;
+        }
+
+        Composite rangeComposite = new RangeComposite(name, new HasContainer(fieldName, new P(compare, value)), current);
         this.current.children.add(rangeComposite);
 
         return this;
     }
 
-    public QueryBuilder range(String name, Object from, Object to) {
+    public QueryBuilder range(String fieldName, Object from, Object to) {
+        return this.range(null, fieldName, from, to);
+    }
+
+    public QueryBuilder range(String name, String fieldName, Object from, Object to) {
         if (this.root == null) {
             throw new UnsupportedOperationException("'range' may not appear as first statement");
         }
@@ -317,7 +338,11 @@ public class QueryBuilder implements Cloneable{
             throw new UnsupportedOperationException("'range' may only appear in the 'filter', 'must', 'mustNot' or 'should' context");
         }
 
-        Composite rangeComposite = new RangeComposite(name, from, to, current);
+        if (StringUtils.isNotBlank(name) && seekLocalName(current, name) != null) {
+            return this;
+        }
+
+        Composite rangeComposite = new RangeComposite(name, fieldName, from, to, current);
         this.current.children.add(rangeComposite);
 
         return this;
@@ -394,6 +419,20 @@ public class QueryBuilder implements Cloneable{
     public QueryBuilder queryBuilderFilter(String name, QueryBuilder queryBuilder) {
         if (this.root == null) {
             throw new UnsupportedOperationException("'queryBuilderFilter' (the filter of a QueryBuilder) may not appear as first statement");
+        }
+
+        if (this.current.op != Op.filter && current.op != Op.must && current.op != Op.mustNot && current.op != Op.should) {
+            throw new UnsupportedOperationException("'queryBuilderFilter' may only appear in the 'filter', 'must', 'mustNot' or 'should' context");
+        }
+
+        if (StringUtils.isNotBlank(name) && seekLocalName(current, name) != null) {
+            this.current = seekLocalName(current, name);
+            return this;
+        }
+
+        if (this.current.op == Op.filter && seekLocalClass(current, QueryBuilderFilterComposite.class) != null) {
+            this.current = seekLocalClass(current, QueryBuilderFilterComposite.class);
+            return this;
         }
 
         Composite queryBuilderFilterComposite = new QueryBuilderFilterComposite(name, current, queryBuilder);
@@ -721,7 +760,7 @@ public class QueryBuilder implements Cloneable{
     public class QueryBuilderFilterComposite extends Composite {
         //region Constructor
         public QueryBuilderFilterComposite(String name, Composite parent, QueryBuilder queryBuilder) {
-            super(name, Op.filter, parent);
+            super(name, Op.queryBuilderFilter, parent);
             this.queryBuilder = queryBuilder;
         }
         //endregion
@@ -880,11 +919,29 @@ public class QueryBuilder implements Cloneable{
         }
     }
 
-    public class TermComposite extends Composite {
+    public abstract class FieldComposite extends Composite {
+        //region Constructor
+        public FieldComposite(String name, String fieldName, Op op, Composite parent) {
+            super(name, op, parent);
+            this.fieldName = fieldName;
+        }
+        //endregion
+
+        //region Properties
+        public String getFieldName() {
+            return this.fieldName;
+        }
+        //endregion
+
+        //region Fields
+        private String fieldName;
+        //endregion
+    }
+
+    public class TermComposite extends FieldComposite {
         //region Constructor
         protected TermComposite(String name, String fieldName, Object value, Composite parent) {
-            super(name, Op.term, parent);
-            this.fieldName = fieldName;
+            super(name, fieldName, Op.term, parent);
             this.value = value;
         }
         //endregion
@@ -892,20 +949,19 @@ public class QueryBuilder implements Cloneable{
         //region Composite Implementation
         @Override
         protected Object build() {
-            return FilterBuilders.termFilter(fieldName, this.value);
+            return FilterBuilders.termFilter(this.getFieldName(), this.value);
         }
         //endregion
 
         //region Fields
-        private String fieldName;
         private Object value;
         //endregion
     }
 
-    public class TermsComposite extends Composite {
+    public class TermsComposite extends FieldComposite {
         //region Constructor
-        protected TermsComposite(String name, Object value, Composite parent) {
-            super(name, Op.terms, parent);
+        protected TermsComposite(String name, String fieldName, Object value, Composite parent) {
+            super(name, fieldName, Op.terms, parent);
             this.value = value;
         }
         //endregion
@@ -914,10 +970,10 @@ public class QueryBuilder implements Cloneable{
         @Override
         protected Object build() {
             if (this.value instanceof Iterable) {
-                return FilterBuilders.termsFilter(getName(), StreamSupport.stream(((Iterable)value).spliterator(), false).toArray());
+                return FilterBuilders.termsFilter(this.getFieldName(), StreamSupport.stream(((Iterable)value).spliterator(), false).toArray());
             }
 
-            return FilterBuilders.termsFilter(getName(), this.value);
+            return FilterBuilders.termsFilter(this.getFieldName(), this.value);
         }
 
         @Override
@@ -941,18 +997,18 @@ public class QueryBuilder implements Cloneable{
         //endregion
     }
 
-    public class RangeComposite extends Composite {
+    public class RangeComposite extends FieldComposite {
 
         //region Constructor
-        protected RangeComposite(String name, Object from, Object to, Composite parent) {
-            super(name, Op.range, parent);
+        protected RangeComposite(String name, String fieldName, Object from, Object to, Composite parent) {
+            super(name, fieldName, Op.range, parent);
 
             this.from = from;
             this.to = to;
         }
 
-        protected RangeComposite(HasContainer has, Composite parent) {
-            super(has.getKey(), Op.range, parent);
+        protected RangeComposite(String name, HasContainer has, Composite parent) {
+            super(name, has.getKey(), Op.range, parent);
 
             this.has = has;
         }
@@ -962,16 +1018,16 @@ public class QueryBuilder implements Cloneable{
         @Override
         protected Object build() {
             if (this.from != null && this.to != null) {
-                return FilterBuilders.rangeFilter(getName()).from(this.from).to(this.to);
+                return FilterBuilders.rangeFilter(this.getFieldName()).from(this.from).to(this.to);
             } else if (has != null ) {
                 if (has.getBiPredicate() instanceof Compare) {
                     Compare compare = (Compare)has.getBiPredicate();
 
                     switch (compare) {
-                        case gt: return FilterBuilders.rangeFilter(getName()).gt(has.getValue());
-                        case gte: return FilterBuilders.rangeFilter(getName()).gte(has.getValue());
-                        case lt: return FilterBuilders.rangeFilter(getName()).lt(has.getValue());
-                        case lte: return FilterBuilders.rangeFilter(getName()).lte(has.getValue());
+                        case gt: return FilterBuilders.rangeFilter(this.getFieldName()).gt(has.getValue());
+                        case gte: return FilterBuilders.rangeFilter(this.getFieldName()).gte(has.getValue());
+                        case lt: return FilterBuilders.rangeFilter(this.getFieldName()).lt(has.getValue());
+                        case lte: return FilterBuilders.rangeFilter(this.getFieldName()).lte(has.getValue());
                         default: throw new UnsupportedOperationException("range filter can only be built using gt, gte, lt, lte compare predicates");
                     }
                 }
