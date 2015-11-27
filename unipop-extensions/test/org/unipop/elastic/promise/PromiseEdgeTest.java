@@ -16,7 +16,10 @@ import org.junit.runner.RunWith;
 import org.unipop.elastic.controller.promise.Promise;
 import org.unipop.elastic.controller.promise.PromiseEdge;
 import org.unipop.elastic.controller.promise.PromiseVertex;
+import org.unipop.elastic.controller.schema.helpers.SearchBuilder;
+import org.unipop.elastic.controller.schema.helpers.TraversalQueryTranslator;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.StreamSupport;
@@ -54,6 +57,15 @@ public class PromiseEdgeTest extends AbstractGremlinTest {
     @LoadGraphWith(LoadGraphWith.GraphData.MODERN)
     public void g_V_outE() {
         List<Edge> edges = g.V().outE().toList();
+        int x = 5;
+    }
+
+    @Test
+    @LoadGraphWith(LoadGraphWith.GraphData.MODERN)
+    public void promisePredicatesStrategy() {
+        Traversal traversal = g.V().outE().out().has("bla",2).has("anotherBla", P.within((new ArrayList<Integer>()).add(666)));
+
+        printTraversalForm(traversal);
         int x = 5;
     }
 }

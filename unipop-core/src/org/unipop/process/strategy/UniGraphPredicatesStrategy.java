@@ -38,11 +38,11 @@ public class UniGraphPredicatesStrategy extends AbstractTraversalStrategy<Traver
             return;
         }
 
-        PredicatesCollector collector = new PredicatesCollector();
+        HasContainersToPredicatesTransformer transformer = new HasContainersToPredicatesTransformer();
 
         TraversalHelper.getStepsOfAssignableClassRecursively(UniGraphStartStep.class, traversal).forEach(elasticGraphStep -> {
             if(elasticGraphStep.getIds().length == 0) {
-                Predicates predicates = collector.getPredicates(elasticGraphStep.getNextStep(), traversal);
+                Predicates predicates = transformer.transformAndRemove(elasticGraphStep.getNextStep(), traversal);
                 elasticGraphStep.getPredicates().hasContainers.addAll(predicates.hasContainers);
                 elasticGraphStep.getPredicates().labels.addAll(predicates.labels);
                 elasticGraphStep.getPredicates().labels.forEach(label -> elasticGraphStep.addLabel(label));
@@ -52,7 +52,7 @@ public class UniGraphPredicatesStrategy extends AbstractTraversalStrategy<Traver
 
         TraversalHelper.getStepsOfAssignableClassRecursively(UniGraphVertexStep.class, traversal).forEach(elasticVertexStep -> {
             boolean returnVertex = elasticVertexStep.getReturnClass().equals(Vertex.class);
-            Predicates predicates = returnVertex ? new Predicates() : collector.getPredicates(elasticVertexStep.getNextStep(), traversal);
+            Predicates predicates = returnVertex ? new Predicates() : transformer.transformAndRemove(elasticVertexStep.getNextStep(), traversal);
             elasticVertexStep.getPredicates().hasContainers.addAll(predicates.hasContainers);
             elasticVertexStep.getPredicates().labels.addAll(predicates.labels);
             elasticVertexStep.getPredicates().labels.forEach(label -> elasticVertexStep.addLabel(label));

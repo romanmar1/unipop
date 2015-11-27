@@ -13,7 +13,7 @@ import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphEdgeSch
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.process.UniGraphStartStep;
 import org.unipop.process.UniGraphVertexStep;
-import org.unipop.process.strategy.PredicatesCollector;
+import org.unipop.process.strategy.HasContainersToPredicatesTransformer;
 import org.unipop.process.strategy.UniGraphStartStepStrategy;
 import org.unipop.process.strategy.UniGraphVertexStepStrategy;
 import org.unipop.structure.UniGraph;
@@ -51,11 +51,12 @@ public class PromisePredicatesStrategy extends AbstractTraversalStrategy<Travers
             return;
         }
 
-        PredicatesCollector collector = new PredicatesCollector();
+        HasContainersToPredicatesTransformer collector = new HasContainersToPredicatesTransformer();
 
         TraversalHelper.getStepsOfAssignableClassRecursively(UniGraphStartStep.class, traversal).forEach(elasticGraphStep -> {
             if(elasticGraphStep.getIds().length == 0) {
-                Predicates predicates = collector.getPredicates(elasticGraphStep.getNextStep(), traversal);
+                //TODO: think if this case should handle promises as well
+                Predicates predicates = collector.transformAndRemove(elasticGraphStep.getNextStep(), traversal);
                 elasticGraphStep.getPredicates().hasContainers.addAll(predicates.hasContainers);
                 elasticGraphStep.getPredicates().labels.addAll(predicates.labels);
                 elasticGraphStep.getPredicates().labels.forEach(label -> elasticGraphStep.addLabel(label));
@@ -67,8 +68,11 @@ public class PromisePredicatesStrategy extends AbstractTraversalStrategy<Travers
             boolean returnVertex = elasticVertexStep.getReturnClass().equals(Vertex.class);
             Predicates predicates;
             if (returnVertex) {
-                predicates = collector.getPredicates(elasticVertexStep.getNextStep(), traversal);
-                predicates.hasContainers = translateToEdgeRedundantProperties(elasticVertexStep.getEdgeLabels(), predicates.hasContainers);
+                predicates = collector.transformAndRemove(elasticVertexStep.getNextStep(), traversal);
+                Iterable<String> labels = (elasticVertexStep.getEdgeLabels() != null && elasticVertexStep.getEdgeLabels().length != 0) ?
+                        Arrays.asList(elasticVertexStep.getEdgeLabels()) :
+                        schemaProvider.getEdgeTypes();
+                predicates.hasContainers = translateToEdgeRedundantProperties(labels, predicates.hasContainers);
             } else {
                 predicates = new Predicates();
             }
@@ -81,8 +85,8 @@ public class PromisePredicatesStrategy extends AbstractTraversalStrategy<Travers
     }
     //endregion
 
-    private ArrayList<HasContainer> translateToEdgeRedundantProperties(String[] labels, List<HasContainer> hasContainers) {
-        ArrayList<HasContainer> newHasContainers = new ArrayList<>();
+    private ArrayList<HasContainer> translateToEdgeRedundantProperties(Iterable<String> labels, List<HasContainer> hasContainers) {
+        HashMap<String, HasContainer> newHasContainers = new HashMap();
         // for each label
         for (String label : labels) {
             if (schemaProvider.getEdgeSchemas(label).isPresent()) {
@@ -98,7 +102,9 @@ public class PromisePredicatesStrategy extends AbstractTraversalStrategy<Travers
                             for (HasContainer hasContainer : hasContainers) {
                                 Optional<String> redundantProperty = edgeRedundancy.getRedundantPropertyName(hasContainer.getKey());
                                 if (redundantProperty.isPresent()) {
-                                    newHasContainers.add(new HasContainer(redundantProperty.get(), hasContainer.getPredicate()));
+                                    if (!newHasContainers.containsKey(hasContainer.toString())) {
+                                        newHasContainers.put(hasContainer.toString(), new HasContainer(redundantProperty.get(), hasContainer.getPredicate()));
+                                    }
                                 } else {
                                     //TODO: no redundant data for property. should we do something?
                                 }
@@ -109,7 +115,7 @@ public class PromisePredicatesStrategy extends AbstractTraversalStrategy<Travers
             }
         }
 
-        return newHasContainers;
+        return new ArrayList<>(newHasContainers.values());
     }
 
     //region private fields

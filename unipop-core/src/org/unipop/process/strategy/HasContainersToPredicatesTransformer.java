@@ -17,7 +17,7 @@ import java.util.Arrays;
  */
 public class HasContainersToPredicatesTransformer {
     //region Private Methods
-    public Predicates getPredicates(Step step, Traversal.Admin traversal){
+    public Predicates transformAndRemove(Step step, Traversal.Admin traversal){
         Predicates predicates = new Predicates();
 
         while(true) {
@@ -34,7 +34,7 @@ public class HasContainersToPredicatesTransformer {
                 TraversalFilterStep traversalFilterStep = (TraversalFilterStep)step;
                 for(Object localChild : traversalFilterStep.getLocalChildren()) {
                     Traversal.Admin filterTraversal = (Traversal.Admin)localChild;
-                    Predicates childPredicates = getPredicates(filterTraversal.getStartStep(), filterTraversal);
+                    Predicates childPredicates = transformAndRemove(filterTraversal.getStartStep(), filterTraversal);
                     childPredicates.hasContainers.forEach(predicates.hasContainers::add);
                     childPredicates.labels.forEach(predicates.labels::add);
 
