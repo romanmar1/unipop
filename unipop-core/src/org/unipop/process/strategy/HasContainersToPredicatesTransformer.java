@@ -15,7 +15,7 @@ import java.util.Arrays;
 /**
  * Created by Karni on 11/26/2015.
  */
-public class PredicatesCollector {
+public class HasContainersToPredicatesTransformer {
     //region Private Methods
     public Predicates getPredicates(Step step, Traversal.Admin traversal){
         Predicates predicates = new Predicates();
