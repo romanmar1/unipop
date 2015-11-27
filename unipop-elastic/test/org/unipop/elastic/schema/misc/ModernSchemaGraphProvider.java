@@ -7,6 +7,8 @@ import org.unipop.controllerprovider.ControllerManagerFactory;
 import org.unipop.elastic.ElasticGraphProvider;
 import org.unipop.elastic.controller.schema.SchemaControllerManager;
 import org.unipop.elastic.controller.schema.helpers.ElasticGraphConfiguration;
+import org.unipop.process.strategy.BasicStrategyRegistrar;
+import org.unipop.process.strategy.DefaultStrategyRegistrar;
 
 import java.io.IOException;
 import java.util.Map;
@@ -31,6 +33,7 @@ public class ModernSchemaGraphProvider extends ElasticGraphProvider {
         elasticConfiguration.setElasticGraphAggregationsDefaultTermsSize(100000);
         elasticConfiguration.setElasticGraphAggregationsDefaultTermsShardSize(100000);
         elasticConfiguration.setElasticGraphAggregationsDefaultTermsExecutonHint("global_ordinals_hash");
+        //elasticConfiguration.setProperty("strategyRegistrar", new BasicStrategyRegistrar());
         //elasticConfiguration.setClusterAddress("some-server:9300");
         //elasticConfiguration.setClusterName("some.remote.cluster");
 

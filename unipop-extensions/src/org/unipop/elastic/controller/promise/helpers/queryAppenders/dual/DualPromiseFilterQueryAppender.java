@@ -39,12 +39,12 @@ public class DualPromiseFilterQueryAppender extends DualPromiseQueryAppenderBase
         Iterable<GraphEdgeSchema> edgeSchemas = getAllDualEdgeSchemasFromTypes(input.getTypesToQuery());
 
         Map<String, QueryBuilder> bulkMap = new HashMap<>();
-        if (StreamSupport.stream(input.getIdPromisesBulk().spliterator(), false).count() > 0) {
-            QueryBuilder idPromiseQueryBuilder = this.idPromiseQueryBuilderFactory.getPromiseQueryBuilder(new IdPromiseEdgeInput(input.getIdPromisesBulk(), edgeSchemas));
+        if (StreamSupport.stream(input.getBulkIdPromises().spliterator(), false).count() > 0) {
+            QueryBuilder idPromiseQueryBuilder = this.idPromiseQueryBuilderFactory.getPromiseQueryBuilder(new IdPromiseEdgeInput(input.getBulkIdPromises(), edgeSchemas));
             bulkMap.put("idPromiseFilter", idPromiseQueryBuilder);
         }
 
-        for(TraversalPromise traversalPromise : input.getTraversalPromisesBulk()) {
+        for(TraversalPromise traversalPromise : input.getBulkTraversalPromises()) {
             QueryBuilder traversalPromiseQueryBuilder = this.traversalPromiseQueryBuilderFactory.getPromiseQueryBuilder(
                     new TraversalPromiseEdgeInput(
                             traversalPromise,
@@ -56,10 +56,10 @@ public class DualPromiseFilterQueryAppender extends DualPromiseQueryAppenderBase
         }
 
         Map<String, QueryBuilder> predicatesMap = new HashMap<>();
-        if (input.getTraversalPromisesPredicates() != null &&
-                StreamSupport.stream(input.getTraversalPromisesPredicates().spliterator(), false).count() > 0) {
+        if (input.getPredicatesTraversalPromises() != null &&
+                StreamSupport.stream(input.getPredicatesTraversalPromises().spliterator(), false).count() > 0) {
             // if we do have traversal promise predicates, we must build filter aggregations for them.
-            for (TraversalPromise traversalPromisePredicate : input.getTraversalPromisesPredicates()) {
+            for (TraversalPromise traversalPromisePredicate : input.getPredicatesTraversalPromises()) {
                 QueryBuilder traversalPromiseQueryBuilder = this.traversalPromiseQueryBuilderFactory.getPromiseQueryBuilder(
                         new TraversalPromiseEdgeInput(
                                 traversalPromisePredicate,

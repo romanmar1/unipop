@@ -10,6 +10,7 @@ import org.unipop.elastic.controller.VertexController;
 import org.unipop.elastic.controller.schema.helpers.HasContainersQueryTranslator;
 import org.unipop.elastic.controller.schema.helpers.SearchBuilder;
 import org.unipop.elastic.controller.schema.helpers.elementConverters.ElementConverter;
+import org.unipop.elastic.helpers.ElasticMutations;
 import org.unipop.structure.BaseVertex;
 import org.unipop.structure.UniGraph;
 
@@ -22,7 +23,10 @@ import java.util.stream.StreamSupport;
  */
 public class PromiseVertexController implements VertexController {
     //region ctor
-    public PromiseVertexController(UniGraph graph, VertexController innerVertexController, ElementConverter<Element, Element> elementConverter) {
+    public PromiseVertexController(
+            UniGraph graph,
+            VertexController innerVertexController,
+            ElementConverter<Element, Element> elementConverter) {
         this.graph = graph;
         this.innerVertexController = innerVertexController;
         this.elementConverter = elementConverter;

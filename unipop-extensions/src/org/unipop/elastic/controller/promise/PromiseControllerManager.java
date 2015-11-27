@@ -93,6 +93,7 @@ public class PromiseControllerManager extends BasicControllerManager {
                                 CompositeElementConverter.Mode.First,
                                 new SingularEdgeConverter(graph, this.schemaProvider, elasticMutations, lazyGetterFactory),
                                 new DualEdgeConverter(graph, this.schemaProvider, elasticMutations, lazyGetterFactory))),
+                elasticMutations,
                 new PromiseEdgeConverter(graph));
     }
 

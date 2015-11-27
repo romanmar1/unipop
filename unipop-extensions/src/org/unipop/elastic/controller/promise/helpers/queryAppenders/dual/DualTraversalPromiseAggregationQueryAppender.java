@@ -42,7 +42,7 @@ public class DualTraversalPromiseAggregationQueryAppender extends DualPromiseQue
             return false;
         }
 
-        return Seq.seq(input.getTraversalPromisesBulk()).count() > 0;
+        return Seq.seq(input.getBulkTraversalPromises()).count() > 0;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class DualTraversalPromiseAggregationQueryAppender extends DualPromiseQue
         Iterable<GraphEdgeSchema> edgeSchemas = getAllDualEdgeSchemasFromTypes(input.getTypesToQuery());
 
         // aggregation layer 1
-        for(TraversalPromise traversalPromise : input.getTraversalPromisesBulk()) {
+        for(TraversalPromise traversalPromise : input.getBulkTraversalPromises()) {
             QueryBuilder traversalPromiseQueryBuilder = this.traversalPromiseQueryBuilderFactory.getPromiseQueryBuilder(
                     new TraversalPromiseEdgeInput(
                         traversalPromise,
@@ -63,10 +63,10 @@ public class DualTraversalPromiseAggregationQueryAppender extends DualPromiseQue
         }
 
         // aggregation layer 2 - if TraversalPredicates exist
-        if (input.getTraversalPromisesPredicates() != null &&
-                StreamSupport.stream(input.getTraversalPromisesPredicates().spliterator(), false).count() > 0) {
+        if (input.getPredicatesTraversalPromises() != null &&
+                StreamSupport.stream(input.getPredicatesTraversalPromises().spliterator(), false).count() > 0) {
             // if we do have traversal promise predicates, we must build filter aggregations for them.
-            for(TraversalPromise traversalPromisePredicate : input.getTraversalPromisesPredicates()) {
+            for(TraversalPromise traversalPromisePredicate : input.getPredicatesTraversalPromises()) {
                 QueryBuilder traversalPromiseQueryBuilder = this.traversalPromiseQueryBuilderFactory.getPromiseQueryBuilder(
                         new TraversalPromiseEdgeInput(
                             traversalPromisePredicate,
@@ -90,7 +90,7 @@ public class DualTraversalPromiseAggregationQueryAppender extends DualPromiseQue
             if (destinationIdFields.size() == 1) {
                 input.getSearchBuilder().getAggregationBuilder().seekRoot()
                         .filters(PromiseStringConstants.BULK_TRAVERSAL_PROMISES)
-                        .terms(destinationIdFields.iterator().next())
+                        .terms(PromiseStringConstants.REDUCED_ID_PROMISES)
                         .field(destinationIdFields.iterator().next())
                         .size(0)
                         .shardSize(0)

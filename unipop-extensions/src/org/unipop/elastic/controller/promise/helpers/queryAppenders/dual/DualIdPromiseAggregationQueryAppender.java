@@ -46,7 +46,7 @@ public class DualIdPromiseAggregationQueryAppender extends DualPromiseQueryAppen
             return false;
         }
 
-        return Seq.seq(input.getIdPromisesBulk()).count() > 0;
+        return Seq.seq(input.getBulkIdPromises()).count() > 0;
     }
 
     @Override
@@ -57,16 +57,16 @@ public class DualIdPromiseAggregationQueryAppender extends DualPromiseQueryAppen
                 .map(edgeSchema -> edgeSchema.getSource().get().getIdField())
                 .collect(Collectors.toSet());
 
-        QueryBuilder idPromiseQueryBuilder = this.idPromiseQueryBuilderFactory.getPromiseQueryBuilder(new IdPromiseEdgeInput(input.getIdPromisesBulk(), edgeSchemas));
+        QueryBuilder idPromiseQueryBuilder = this.idPromiseQueryBuilderFactory.getPromiseQueryBuilder(new IdPromiseEdgeInput(input.getBulkIdPromises(), edgeSchemas));
 
         // aggregation layer 1
         String firstAggregationLayerName = null;
         if (sourceIdFields.size() == 1) {
-            input.getSearchBuilder().getAggregationBuilder().seekRoot().filters(PromiseStringConstants.BULK_ID_PROMISES)
+            input.getSearchBuilder().getAggregationBuilder().seekRoot().filters(PromiseStringConstants.BULK_ID_PROMISES_FILTERS)
                     // filtering relevant data to aggregate
-                    .filter("IdPromiseFilter", idPromiseQueryBuilder).seek(PromiseStringConstants.BULK_ID_PROMISES)
+                    .filter(PromiseStringConstants.BULK_ID_PROMISES_FILTER, idPromiseQueryBuilder).seek(PromiseStringConstants.BULK_ID_PROMISES_FILTERS)
                     // aggregate by relevant field
-                    .terms(sourceIdFields.iterator().next())
+                    .terms(PromiseStringConstants.BULK_ID_PROMISES)
                     .field(sourceIdFields.iterator().next())
                     .size(0).shardSize(0).executionHint(ExecutionHintStrings.GLOBAL_ORIDNALS_HASH);
             firstAggregationLayerName = sourceIdFields.iterator().next();
@@ -79,10 +79,10 @@ public class DualIdPromiseAggregationQueryAppender extends DualPromiseQueryAppen
         }
 
         // aggregation layer 2 - if TraversalPredicates exist
-        if (input.getTraversalPromisesPredicates() != null &&
-                StreamSupport.stream(input.getTraversalPromisesPredicates().spliterator(), false).count() > 0) {
+        if (input.getPredicatesTraversalPromises() != null &&
+                StreamSupport.stream(input.getPredicatesTraversalPromises().spliterator(), false).count() > 0) {
             // if we do have traversal promise predicates, we must build filter aggregations for them.
-            for(TraversalPromise traversalPromisePredicate : input.getTraversalPromisesPredicates()) {
+            for(TraversalPromise traversalPromisePredicate : input.getPredicatesTraversalPromises()) {
                 QueryBuilder traversalPromiseQueryBuilder = this.traversalPromiseQueryBuilderFactory.getPromiseQueryBuilder(
                         new TraversalPromiseEdgeInput(
                             traversalPromisePredicate,
@@ -102,7 +102,7 @@ public class DualIdPromiseAggregationQueryAppender extends DualPromiseQueryAppen
 
             if (destinationIdFields.size() == 1) {
                 input.getSearchBuilder().getAggregationBuilder().seek(firstAggregationLayerName)
-                        .terms(destinationIdFields.iterator().next())
+                        .terms(PromiseStringConstants.REDUCED_ID_PROMISES)
                         .field(destinationIdFields.iterator().next())
                         .size(0)
                         .shardSize(0)

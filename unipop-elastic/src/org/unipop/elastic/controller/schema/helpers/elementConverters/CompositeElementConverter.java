@@ -9,14 +9,14 @@ import java.util.Set;
 /**
  * Created by Roman on 3/21/2015.
  */
-public class CompositeElementConverter implements ElementConverter<Element, Element> {
+public class CompositeElementConverter<TElementSource, TElementDest> implements ElementConverter<TElementSource, TElementDest> {
     public enum Mode {
         First,
         All
     }
 
     //region Constructor
-    public CompositeElementConverter(Mode mode, ElementConverter<Element, Element>... converters) {
+    public CompositeElementConverter(Mode mode, ElementConverter<TElementSource, TElementDest>... converters) {
         this.mode = mode;
         this.converters = Arrays.asList(converters);
     }
@@ -24,8 +24,8 @@ public class CompositeElementConverter implements ElementConverter<Element, Elem
 
     //region SearchHitElementConverter Implementation
     @Override
-    public boolean canConvert(Element element) {
-        for(ElementConverter<Element, Element> converter : converters) {
+    public boolean canConvert(TElementSource element) {
+        for(ElementConverter<TElementSource, TElementDest> converter : converters) {
             if (converter.canConvert(element)) {
                 return true;
             }
@@ -35,10 +35,10 @@ public class CompositeElementConverter implements ElementConverter<Element, Elem
     }
 
     @Override
-    public Iterable<Element> convert(Element element) {
+    public Iterable<TElementDest> convert(TElementSource element) {
         switch (this.mode) {
             case First:
-                for(ElementConverter<Element, Element> converter : converters) {
+                for(ElementConverter<TElementSource, TElementDest> converter : converters) {
                     if (converter.canConvert(element)) {
                         return converter.convert(element);
                     }
@@ -46,10 +46,10 @@ public class CompositeElementConverter implements ElementConverter<Element, Elem
                 return new ArrayList<>();
 
             case All:
-                ArrayList<Element> elements = new ArrayList<>();
-                for(ElementConverter<Element, Element> converter : converters) {
+                ArrayList<TElementDest> elements = new ArrayList<>();
+                for(ElementConverter<TElementSource, TElementDest> converter : converters) {
                     if (converter.canConvert(element)) {
-                        for(Element convertedElement : converter.convert(element)) {
+                        for(TElementDest convertedElement : converter.convert(element)) {
                             elements.add(convertedElement);
                         }
                     }
@@ -63,7 +63,7 @@ public class CompositeElementConverter implements ElementConverter<Element, Elem
     //endregion
 
     //region Fields
-    private Iterable<ElementConverter<Element, Element>> converters;
+    private Iterable<ElementConverter<TElementSource, TElementDest>> converters;
     private Mode mode;
     //endregion
 }

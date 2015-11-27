@@ -7,18 +7,22 @@ import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.elasticsearch.client.Client;
+import org.jooq.lambda.Seq;
 import org.unipop.elastic.controller.EdgeController;
 import org.unipop.elastic.controller.Predicates;
+import org.unipop.elastic.controller.promise.helpers.elementConverters.map.*;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.*;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.dual.*;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.*;
 import org.unipop.elastic.controller.schema.helpers.*;
 import org.unipop.elastic.controller.schema.helpers.aggregationConverters.CompositeAggregation;
+import org.unipop.elastic.controller.schema.helpers.elementConverters.CompositeElementConverter;
 import org.unipop.elastic.controller.schema.helpers.elementConverters.ElementConverter;
 import org.unipop.elastic.controller.schema.helpers.queryAppenders.CompositeQueryAppender;
 import org.unipop.elastic.controller.schema.helpers.queryAppenders.QueryAppender;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.elastic.helpers.AggregationHelper;
+import org.unipop.elastic.helpers.ElasticMutations;
 import org.unipop.structure.BaseEdge;
 import org.unipop.structure.BaseVertex;
 import org.unipop.structure.UniGraph;
@@ -37,12 +41,14 @@ public class PromiseEdgeController implements EdgeController {
             GraphElementSchemaProvider schemaProvider,
             Client client,
             EdgeController innerEdgeController,
+            ElasticMutations elasticMutations,
             ElementConverter<Element, Element> elementConverter) {
         this.graph = graph;
         this.innerEdgeController = innerEdgeController;
         this.elementConverter = elementConverter;
         this.schemaProvider = schemaProvider;
         this.client = client;
+        this.elasticMutations = elasticMutations;
     }
     //endregion
 
@@ -81,6 +87,8 @@ public class PromiseEdgeController implements EdgeController {
 
     @Override
     public Iterator<BaseEdge> edges(Vertex[] vertices, Direction direction, String[] edgeLabels, Predicates predicates) {
+        this.elasticMutations.refreshIfDirty();
+
         List<HasContainer> predicatesPromiseHasContainers = predicates.hasContainers.stream()
                 .filter(hasContainer -> hasContainer.getKey().toLowerCase().equals(PREDICATES_PROMISE)).collect(Collectors.toList());
         if (predicatesPromiseHasContainers.size() > 1) {
@@ -90,11 +98,14 @@ public class PromiseEdgeController implements EdgeController {
         List<HasContainer> edgeHasContainers = predicates.hasContainers.stream()
                 .filter(hasContainer -> !predicatesPromiseHasContainers.contains(hasContainer)).collect(Collectors.toList());
 
+        Iterable<IdPromise> bulkIdPromises = getBulkIdPromises(Seq.of(vertices).cast(PromiseVertex.class).toList());
+        Iterable<TraversalPromise> bulkTraversalPromises = getBulkTraversalPromises(Seq.of(vertices).cast(PromiseVertex.class).toList());
+        Iterable<TraversalPromise> predicatesTraversalPromises = Seq.seq(extractPromises(predicatesPromiseHasContainers)).cast(TraversalPromise.class).toList();
+
         SearchBuilder searchBuilder = buildBulkEdgePromiseQuery(
-                getBulkIdPromises(Arrays.stream(vertices).map(PromiseVertex.class::cast).collect(Collectors.toList())),
-                getBulkTraversalPromises(Arrays.stream(vertices).map(PromiseVertex.class::cast).collect(Collectors.toList())),
-                StreamSupport.stream(extractPromises(predicatesPromiseHasContainers).spliterator(), false)
-                    .map(TraversalPromise.class::cast).collect(Collectors.toList()),
+                bulkIdPromises,
+                bulkTraversalPromises,
+                predicatesTraversalPromises,
                 edgeLabels,
                 edgeHasContainers,
                 direction);
@@ -114,7 +125,7 @@ public class PromiseEdgeController implements EdgeController {
                 AggregationHelper.getAggregationConverter(searchBuilder.getAggregationBuilder(), false)
                 .convert(compositeAggregation);
 
-        return Collections.emptyIterator();
+        return Seq.seq(this.getElementConverter(bulkTraversalPromises, predicatesTraversalPromises, direction).convert(result)).cast(BaseEdge.class).iterator();
     }
 
     @Override
@@ -147,7 +158,7 @@ public class PromiseEdgeController implements EdgeController {
     private SearchBuilder buildBulkEdgePromiseQuery(
             Iterable<IdPromise> bulkIdPromises,
             Iterable<TraversalPromise> bulkTraversalPromises,
-            Iterable<TraversalPromise> traversalPromisesPredicates,
+            Iterable<TraversalPromise> predicatesTraversalPromises,
             String[] edgeLabels,
             Iterable<HasContainer> edgeHasContainers,
             Direction direction) {
@@ -156,7 +167,7 @@ public class PromiseEdgeController implements EdgeController {
         PromiseBulkInput promiseBulkInput = new PromiseBulkInput(
                 bulkIdPromises,
                 bulkTraversalPromises,
-                traversalPromisesPredicates,
+                predicatesTraversalPromises,
                 searchBuilder.getTypes(),
                 searchBuilder);
 
@@ -235,7 +246,7 @@ public class PromiseEdgeController implements EdgeController {
     protected void translateHasContainers(SearchBuilder searchBuilder, Iterable<HasContainer> hasContainers) {
         HasContainersQueryTranslator hasContainersQueryTranslator = new HasContainersQueryTranslator();
         for (HasContainer hasContainer : hasContainers) {
-            searchBuilder.getQueryBuilder().seekRoot().query().filtered().filter().bool();
+            searchBuilder.getQueryBuilder().seekRoot().query().filtered().filter().bool().must();
             hasContainersQueryTranslator.applyHasContainer(searchBuilder, searchBuilder.getQueryBuilder(), hasContainer);
         }
     }
@@ -316,6 +327,19 @@ public class PromiseEdgeController implements EdgeController {
             SearchBuilderHelper.applyTypes(searchBuilder, schemaProvider, elementType);
         }
     }
+
+    private ElementConverter<Map<String, Object>, Element> getElementConverter(
+            Iterable<TraversalPromise> bulkTraversalPromises,
+            Iterable<TraversalPromise> predicatesTraversalPromises,
+            Direction direction) {
+        return new MapDistinctEdgeConverter(this.graph, direction,
+            new CompositeElementConverter<Map<String, Object>, Element>(
+                    CompositeElementConverter.Mode.All,
+                    new IdToIdMapEdgeConverter(this.graph, direction),
+                    new IdToTraversalMapEdgeConverter(this.graph, direction, predicatesTraversalPromises),
+                    new TraversalToIdMapEdgeConverter(this.graph, direction, bulkTraversalPromises),
+                    new TraversalToTraversalMapEdgeConverter(this.graph, direction, bulkTraversalPromises, predicatesTraversalPromises)));
+    }
     //endregion
 
     //region Fields
@@ -324,6 +348,7 @@ public class PromiseEdgeController implements EdgeController {
     private ElementConverter<Element, Element> elementConverter;
     private GraphElementSchemaProvider schemaProvider;
     private Client client;
+    private ElasticMutations elasticMutations;
 
     private final String IN_PROMISE = "in_promise";
     private final String OUT_PROMISE = "out_promise";

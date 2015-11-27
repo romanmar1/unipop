@@ -37,4 +37,12 @@ public class GroupTests extends AbstractGremlinTest {
         Object result = traversal.next();
         int x = 5;
     }
+
+    @Test
+    @LoadGraphWith(MODERN)
+    public void g_V_bothE_count() throws Exception {
+        Long count =  g.V().bothE().count().toList().get(0);
+
+        int x = 5;
+    }
 }

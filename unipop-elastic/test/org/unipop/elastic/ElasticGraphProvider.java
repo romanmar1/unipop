@@ -12,6 +12,7 @@ import org.unipop.controllerprovider.ControllerManagerFactory;
 import org.unipop.elastic.controllermanagers.BasicElasticControllerManager;
 import org.unipop.elastic.helpers.ElasticClientFactory;
 import org.unipop.elastic.helpers.ElasticHelper;
+import org.unipop.process.strategy.BasicStrategyRegistrar;
 import org.unipop.process.strategy.DefaultStrategyRegistrar;
 import org.unipop.structure.*;
 
@@ -64,6 +65,7 @@ public class ElasticGraphProvider extends AbstractGraphProvider {
             //put("controllerManager", BasicElasticControllerManager.class.getName());
             put("controllerManagerFactory", (ControllerManagerFactory)() -> new BasicElasticControllerManager());
             put("strategyRegistrar", new DefaultStrategyRegistrar());
+            //put("strategyRegistrar", new BasicStrategyRegistrar());
         }};
     }
 

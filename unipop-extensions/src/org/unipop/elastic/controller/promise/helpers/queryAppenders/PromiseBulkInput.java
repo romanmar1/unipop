@@ -14,30 +14,30 @@ import java.util.Map;
 public class PromiseBulkInput {
     //Constructor
     public PromiseBulkInput(
-            Iterable<IdPromise> idPromisesBulk,
-            Iterable<TraversalPromise> traversalPromisesBulk,
-            Iterable<TraversalPromise> traversalPromisesPredicates,
+            Iterable<IdPromise> bulkIdPromises,
+            Iterable<TraversalPromise> bulkTraversalPromises,
+            Iterable<TraversalPromise> predicatesTraversalPromises,
             Iterable<String> typesToQuery,
             SearchBuilder searchBuilder) {
-        this.idPromisesBulk = idPromisesBulk;
-        this.traversalPromisesBulk = traversalPromisesBulk;
-        this.traversalPromisesPredicates = traversalPromisesPredicates;
+        this.bulkIdPromises = bulkIdPromises;
+        this.bulkTraversalPromises = bulkTraversalPromises;
+        this.predicatesTraversalPromises = predicatesTraversalPromises;
         this.typesToQuery = typesToQuery;
         this.searchBuilder = searchBuilder;
     }
     //endregion
 
     //region Properties
-    public Iterable<IdPromise> getIdPromisesBulk() {
-        return this.idPromisesBulk;
+    public Iterable<IdPromise> getBulkIdPromises() {
+        return this.bulkIdPromises;
     }
 
-    public Iterable<TraversalPromise> getTraversalPromisesBulk() {
-        return this.traversalPromisesBulk;
+    public Iterable<TraversalPromise> getBulkTraversalPromises() {
+        return this.bulkTraversalPromises;
     }
 
-    public Iterable<TraversalPromise> getTraversalPromisesPredicates() {
-        return this.traversalPromisesPredicates;
+    public Iterable<TraversalPromise> getPredicatesTraversalPromises() {
+        return this.predicatesTraversalPromises;
     }
 
     public Iterable<String> getTypesToQuery() {
@@ -50,9 +50,9 @@ public class PromiseBulkInput {
     //endregion
 
     //region Fields
-    private Iterable<IdPromise> idPromisesBulk;
-    private Iterable<TraversalPromise> traversalPromisesBulk;
-    private Iterable<TraversalPromise> traversalPromisesPredicates;
+    private Iterable<IdPromise> bulkIdPromises;
+    private Iterable<TraversalPromise> bulkTraversalPromises;
+    private Iterable<TraversalPromise> predicatesTraversalPromises;
     private Iterable<String> typesToQuery;
 
     private SearchBuilder searchBuilder;
