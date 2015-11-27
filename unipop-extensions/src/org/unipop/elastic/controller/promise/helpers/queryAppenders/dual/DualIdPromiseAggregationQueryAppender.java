@@ -1,6 +1,7 @@
 package org.unipop.elastic.controller.promise.helpers.queryAppenders.dual;
 
 import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.jooq.lambda.Seq;
 import org.unipop.elastic.controller.promise.IdPromise;
 import org.unipop.elastic.controller.promise.TraversalPromise;
 import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
@@ -39,6 +40,15 @@ public class DualIdPromiseAggregationQueryAppender extends DualPromiseQueryAppen
     //endregion
 
     //region DualPromiseQueryAppenderBase Implementation
+    @Override
+    public boolean canAppend(PromiseBulkInput input) {
+        if (!super.canAppend(input)) {
+            return false;
+        }
+
+        return Seq.seq(input.getIdPromisesBulk()).count() > 0;
+    }
+
     @Override
     public boolean append(PromiseBulkInput input) {
         Iterable<GraphEdgeSchema> edgeSchemas = getAllDualEdgeSchemasFromTypes(input.getTypesToQuery());

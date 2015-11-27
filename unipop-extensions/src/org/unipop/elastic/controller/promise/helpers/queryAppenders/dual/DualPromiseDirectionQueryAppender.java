@@ -41,11 +41,18 @@ public class DualPromiseDirectionQueryAppender extends DualPromiseQueryAppenderB
                         (seq1, seq2) -> seq1.concat(seq2).distinct()));
 
         for(Map.Entry<String, Seq<String>> directionEntry : directionFields.entrySet()) {
-            if (Seq.of(directionEntry.getValue()).count() > 0) {
-                input.getSearchBuilder().getQueryBuilder().seekRoot().query().filtered().filter()
-                        .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
-                        .bool(PromiseStringConstants.DIRECTIONS_FILTER).should()
-                        .terms(directionEntry.getKey(), Seq.of(directionEntry.getValue()));
+            Iterable<String> directionValues = directionEntry.getValue().toList();
+            if (Seq.seq(directionValues).count() > 0) {
+                if (directionFields.size() == 1) {
+                    input.getSearchBuilder().getQueryBuilder().seekRoot().query().filtered().filter()
+                            .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
+                            .terms(directionEntry.getKey(), directionValues);
+                } else {
+                    input.getSearchBuilder().getQueryBuilder().seekRoot().query().filtered().filter()
+                            .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
+                            .bool(PromiseStringConstants.DIRECTIONS_FILTER).should()
+                            .terms(directionEntry.getKey(), directionValues);
+                }
             }
         }
 

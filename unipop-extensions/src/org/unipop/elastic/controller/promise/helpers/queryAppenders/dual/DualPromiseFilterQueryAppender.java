@@ -1,6 +1,7 @@
 package org.unipop.elastic.controller.promise.helpers.queryAppenders.dual;
 
 import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.jooq.lambda.Seq;
 import org.unipop.elastic.controller.promise.TraversalPromise;
 import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.PromiseBulkInput;
@@ -78,42 +79,53 @@ public class DualPromiseFilterQueryAppender extends DualPromiseQueryAppenderBase
     //endregion
 
     //region Private Methods
-    protected void addBulkAndPredicatesPromisesToQuery(
-            Map<String, QueryBuilder> bulkMap,
-            Map<String, QueryBuilder> predicatesMap,
-            QueryBuilder queryBuilder) {
+    protected void addBulkAndPredicatesPromisesToQuery(Map<String, QueryBuilder> bulkMap, Map<String, QueryBuilder> predicatesMap, QueryBuilder queryBuilder) {
 
         // if there are predicates promises, the query wil have additional must nesting level
         // with should filters on bulk promises and should filters on predicate promises
-        if (StreamSupport.stream(predicatesMap.values().spliterator(), false).count() > 0) {
-            queryBuilder.seekRoot().query().filtered().filter()
-                    .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
-                    .bool(PromiseStringConstants.PROMISES_FILTER).must()
-                    .bool(PromiseStringConstants.BULK_PROMISES_FILTER);
-
+        if (Seq.seq(predicatesMap.values()).count() > 0) {
             for(Map.Entry<String, QueryBuilder> bulkEntry : bulkMap.entrySet()) {
-                queryBuilder.seek(PromiseStringConstants.BULK_PROMISES_FILTER)
-                        .should().queryBuilderFilter(bulkEntry.getKey(), bulkEntry.getValue());
+                if (bulkMap.size() == 1) {
+                    queryBuilder.seekRoot().query().filtered().filter()
+                            .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
+                            .bool(PromiseStringConstants.PROMISES_FILTER).must()
+                            .queryBuilderFilter(bulkEntry.getKey(), bulkEntry.getValue());
+                } else {
+                    queryBuilder.seekRoot().query().filtered().filter()
+                            .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
+                            .bool(PromiseStringConstants.PROMISES_FILTER).must()
+                            .bool(PromiseStringConstants.BULK_PROMISES_FILTER).should()
+                            .queryBuilderFilter(bulkEntry.getKey(), bulkEntry.getValue());
+                }
             }
 
-            queryBuilder.seekRoot().query().filtered().filter()
-                    .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
-                    .bool(PromiseStringConstants.PROMISES_FILTER).must()
-                    .bool(PromiseStringConstants.PREDICATES_PROMISES_FILTER);
-
             for(Map.Entry<String, QueryBuilder> predicatesEntry : predicatesMap.entrySet()) {
-                queryBuilder.seek(PromiseStringConstants.PREDICATES_PROMISES_FILTER)
-                        .should().queryBuilderFilter(predicatesEntry.getKey(), predicatesEntry.getValue());
+                if (predicatesMap.size() == 1) {
+                    queryBuilder.seekRoot().query().filtered().filter()
+                            .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
+                            .bool(PromiseStringConstants.PROMISES_FILTER).must()
+                            .queryBuilderFilter(predicatesEntry.getKey(), predicatesEntry.getValue());
+                } else {
+                    queryBuilder.seekRoot().query().filtered().filter()
+                            .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
+                            .bool(PromiseStringConstants.PROMISES_FILTER).must()
+                            .bool(PromiseStringConstants.PREDICATES_PROMISES_FILTER).should()
+                            .queryBuilderFilter(predicatesEntry.getKey(), predicatesEntry.getValue());
+                }
             }
             // otherwise, the query will have only a should portion of the bulk promises
         } else {
-            queryBuilder.seekRoot().query().filtered().filter()
-                    .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
-                    .bool(PromiseStringConstants.PROMISES_FILTER);
-
             for(Map.Entry<String, QueryBuilder> bulkEntry : bulkMap.entrySet()) {
-                queryBuilder.seek(PromiseStringConstants.PROMISES_FILTER)
-                        .should().queryBuilderFilter(bulkEntry.getKey(), bulkEntry.getValue());
+                if (bulkMap.size() == 1) {
+                    queryBuilder.seekRoot().query().filtered().filter()
+                            .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
+                            .queryBuilderFilter(bulkEntry.getKey(), bulkEntry.getValue());
+                } else {
+                    queryBuilder.seekRoot().query().filtered().filter()
+                            .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
+                            .bool(PromiseStringConstants.PROMISES_FILTER).should()
+                            .queryBuilderFilter(bulkEntry.getKey(), bulkEntry.getValue());
+                }
             }
         }
     }
