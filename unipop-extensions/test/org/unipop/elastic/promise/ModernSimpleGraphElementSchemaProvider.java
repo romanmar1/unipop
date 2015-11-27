@@ -129,7 +129,7 @@ public class ModernSimpleGraphElementSchemaProvider implements GraphElementSchem
                 return Optional.of(new End() {
                     @Override
                     public String getIdField() {
-                        return "personIdA";
+                        return "sourceId";
                     }
 
                     @Override
@@ -139,7 +139,7 @@ public class ModernSimpleGraphElementSchemaProvider implements GraphElementSchem
 
                     @Override
                     public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
-                        return Optional.of(new PrefixedEdgeRedundancy("personA."));
+                        return Optional.of(new PrefixedEdgeRedundancy("source."));
                     }
                 });
             }
@@ -149,7 +149,7 @@ public class ModernSimpleGraphElementSchemaProvider implements GraphElementSchem
                 return Optional.of(new End() {
                     @Override
                     public String getIdField() {
-                        return "personIdB";
+                        return "destinationId";
                     }
 
                     @Override
@@ -159,7 +159,7 @@ public class ModernSimpleGraphElementSchemaProvider implements GraphElementSchem
 
                     @Override
                     public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
-                        return Optional.of(new PrefixedEdgeRedundancy("personB."));
+                        return Optional.of(new PrefixedEdgeRedundancy("destination."));
                     }
                 });
             }

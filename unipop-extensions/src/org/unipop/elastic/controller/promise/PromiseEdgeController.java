@@ -10,6 +10,8 @@ import org.elasticsearch.client.Client;
 import org.unipop.elastic.controller.EdgeController;
 import org.unipop.elastic.controller.Predicates;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.*;
+import org.unipop.elastic.controller.promise.helpers.queryAppenders.dual.*;
+import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.*;
 import org.unipop.elastic.controller.schema.helpers.*;
 import org.unipop.elastic.controller.schema.helpers.aggregationConverters.CompositeAggregation;
 import org.unipop.elastic.controller.schema.helpers.elementConverters.ElementConverter;
@@ -288,16 +290,19 @@ public class PromiseEdgeController implements EdgeController {
     }
 
     private QueryAppender<PromiseBulkInput> getQueryAppender(Direction direction) {
-        return new PromiseBulkQueryAppender(
-                this.graph,
-                this.schemaProvider,
-                Optional.of(Direction.OUT),
-                new CompositeQueryAppender<PromiseTypesBulkInput<IdPromise>>(
-                        CompositeQueryAppender.Mode.First,
-                        new DualIdPromiseQueryAppender(this.graph, this.schemaProvider, Optional.of(direction))),
-                new CompositeQueryAppender<PromiseTypesBulkInput<TraversalPromise>>(
-                        CompositeQueryAppender.Mode.First,
-                        new DualTraversalPromiseQueryAppender(this.graph, this.schemaProvider, Optional.of(direction))));
+        QueryBuilderFactory<TraversalPromiseEdgeInput> traversalPromiseQueryBuilderFactory = new CachedTraversalPromiseEdgeQueryBuilderFactory<>(
+                new TraversalPromiseEdgeQueryBuilderFactory()
+        );
+
+        QueryBuilderFactory<IdPromiseEdgeInput> idPromiseQueryBuilderFactory = new IdPromiseEdgeQueryBuilderFactory();
+
+        return new CompositeQueryAppender<PromiseBulkInput>(
+                    CompositeQueryAppender.Mode.All,
+                    new DualPromiseTypesQueryAppender(this.graph, this.schemaProvider, Optional.of(direction)),
+                    new DualPromiseDirectionQueryAppender(this.graph, this.schemaProvider, Optional.of(direction)),
+                    new DualPromiseFilterQueryAppender(this.graph, this.schemaProvider, Optional.of(direction), idPromiseQueryBuilderFactory, traversalPromiseQueryBuilderFactory),
+                    new DualIdPromiseAggregationQueryAppender(this.graph, this.schemaProvider, Optional.of(direction), idPromiseQueryBuilderFactory, traversalPromiseQueryBuilderFactory),
+                    new DualTraversalPromiseAggregationQueryAppender(this.graph, this.schemaProvider, Optional.of(direction), traversalPromiseQueryBuilderFactory));
 
     }
 

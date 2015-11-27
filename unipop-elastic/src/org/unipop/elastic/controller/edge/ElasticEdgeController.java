@@ -169,7 +169,7 @@ public class ElasticEdgeController implements org.unipop.elastic.controller.Edge
                     reducerTraversal,
                     0,
                     0,
-                    ExecutionHintStrings.GLOBAL_ORIDNAL_HASH
+                    ExecutionHintStrings.GLOBAL_ORIDNALS_HASH
             );
     }
 

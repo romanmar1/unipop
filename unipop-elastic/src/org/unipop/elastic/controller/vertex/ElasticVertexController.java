@@ -95,7 +95,7 @@ public class ElasticVertexController implements VertexController {
         boolFilter.must(FilterBuilders.missingFilter(ElasticEdge.InId));
 
         AggregationBuilder aggregationBuilder = new AggregationBuilder();
-        AggregationHelper.applyAggregationBuilder(aggregationBuilder, keyTraversal, reducerTraversal, 0, 0, ExecutionHintStrings.GLOBAL_ORIDNAL_HASH);
+        AggregationHelper.applyAggregationBuilder(aggregationBuilder, keyTraversal, reducerTraversal, 0, 0, ExecutionHintStrings.GLOBAL_ORIDNALS_HASH);
 
         SearchRequestBuilder searchRequest = client.prepareSearch().setIndices(defaultIndex)
                 .setQuery(QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), boolFilter))

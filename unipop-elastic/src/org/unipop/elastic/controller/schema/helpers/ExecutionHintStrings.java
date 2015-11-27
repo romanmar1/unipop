@@ -5,5 +5,5 @@ package org.unipop.elastic.controller.schema.helpers;
  */
 public class ExecutionHintStrings {
     public static final String GLOBAL_ORDINALS_LOW_CARDINALITY = "global_ordinals_low_cardinality";
-    public static final String GLOBAL_ORIDNAL_HASH = "global_ordinal_hash";
+    public static final String GLOBAL_ORIDNALS_HASH = "global_ordinals_hash";
 }

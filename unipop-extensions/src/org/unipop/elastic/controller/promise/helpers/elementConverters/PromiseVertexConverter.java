@@ -29,7 +29,7 @@ public class PromiseVertexConverter implements ElementConverter<Element, Element
 
     @Override
     public Iterable<Element> convert(Element element) {
-        return Arrays.asList(new PromiseVertex(new IdPromise(element.id(), element.label()), graph));
+        return Arrays.asList(new PromiseVertex(new IdPromise(element.id()), graph));
     }
     //endregion
 
