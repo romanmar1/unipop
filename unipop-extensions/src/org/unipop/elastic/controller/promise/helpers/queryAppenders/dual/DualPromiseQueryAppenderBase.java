@@ -26,85 +26,33 @@ public abstract class DualPromiseQueryAppenderBase extends GraphQueryAppenderBas
     public DualPromiseQueryAppenderBase(
             UniGraph graph,
             GraphElementSchemaProvider schemaProvider,
-            Optional<Direction> direction,
-            QueryBuilderFactory<TraversalPromiseEdgeInput> traversalPromiseQueryBuilderFactory) {
+            Optional<Direction> direction) {
         super(graph, schemaProvider, direction);
-
-        this.traversalPromiseQueryBuilderFactory = traversalPromiseQueryBuilderFactory;
     }
     //endregion
 
     //region GraphQueryAppenderBase Implementation
     @Override
     public boolean canAppend(PromiseBulkInput input) {
-        Iterable<GraphEdgeSchema> edgeSchemas = getAllEdgeSchemasFromTypes(input.getTypesToQuery());
+        Iterable<GraphEdgeSchema> edgeSchemas = getAllDualEdgeSchemasFromTypes(input.getTypesToQuery());
         if (StreamSupport.stream(edgeSchemas.spliterator(), false).count() == 0) {
             return false;
         }
 
-        // making sure that all edges are dual (dual+singular edges can be supported if needed)
-        if (StreamSupport.stream(edgeSchemas.spliterator(), false).anyMatch(edgeSchema -> {
-            Optional<GraphEdgeSchema.Direction> edgeDirection = edgeSchema.getDirection();
-            return !edgeDirection.isPresent();
-        })) {
-            return false;
-        }
-
-        return true;
+        return StreamSupport.stream(edgeSchemas.spliterator(), false).count() > 0;
     }
     //endregion
 
     //region Protected Methods
-    protected Iterable<GraphEdgeSchema> getAllEdgeSchemasFromTypes(Iterable<String> edgeTypes) {
+    protected Iterable<GraphEdgeSchema> getAllDualEdgeSchemasFromTypes(Iterable<String> edgeTypes) {
         return StreamSupport.stream(edgeTypes.spliterator(), false)
                 .<GraphEdgeSchema>flatMap(typeToQuery -> this.getSchemaProvider().getEdgeSchemas(typeToQuery).isPresent() ?
                         StreamSupport.stream(this.getSchemaProvider().getEdgeSchemas(typeToQuery).get().spliterator(), false) :
                         Stream.empty())
+                .filter(edgeSchema -> edgeSchema.getDirection().isPresent())
                 .collect(Collectors.toList());
     }
 
-    protected void addBulkAndPredicatesPromisesToQuery(
-            Map<String, QueryBuilder> bulkMap,
-            Map<String, QueryBuilder> predicatesMap,
-            QueryBuilder queryBuilder) {
 
-        // if there are predicates promises, the query wil have additional must nesting level
-        // with should filters on bulk promises and should filters on predicate promises
-        if (StreamSupport.stream(predicatesMap.values().spliterator(), false).count() > 0) {
-            queryBuilder.seekRoot().query().filtered().filter()
-                    .bool(PromiseStringConstants.PROMISES_AND_TYPES_FILTER).must()
-                    .bool(PromiseStringConstants.PROMISES_FILTER).must()
-                    .bool(PromiseStringConstants.BULK_PROMISES_FILTER);
-
-            for(Map.Entry<String, QueryBuilder> bulkEntry : bulkMap.entrySet()) {
-                queryBuilder.seek(PromiseStringConstants.BULK_PROMISES_FILTER)
-                        .should().queryBuilderFilter(bulkEntry.getKey(), bulkEntry.getValue());
-            }
-
-            queryBuilder.seekRoot().query().filtered().filter()
-                    .bool(PromiseStringConstants.PROMISES_AND_TYPES_FILTER).must()
-                    .bool(PromiseStringConstants.PROMISES_FILTER).must()
-                    .bool(PromiseStringConstants.PREDICATES_PROMISES_FILTER);
-
-            for(Map.Entry<String, QueryBuilder> predicatesEntry : predicatesMap.entrySet()) {
-                queryBuilder.seek(PromiseStringConstants.PREDICATES_PROMISES_FILTER)
-                        .should().queryBuilderFilter(predicatesEntry.getKey(), predicatesEntry.getValue());
-            }
-        // otherwise, the query will have only a should portion of the bulk promises
-        } else {
-            queryBuilder.seekRoot().query().filtered().filter()
-                    .bool(PromiseStringConstants.PROMISES_AND_TYPES_FILTER).must()
-                    .bool(PromiseStringConstants.PROMISES_FILTER);
-
-            for(Map.Entry<String, QueryBuilder> bulkEntry : bulkMap.entrySet()) {
-                queryBuilder.seek(PromiseStringConstants.PROMISES_FILTER)
-                        .should().queryBuilderFilter(bulkEntry.getKey(), bulkEntry.getValue());
-            }
-        }
-    }
-    //endregion
-
-    //region Fields
-    protected QueryBuilderFactory<TraversalPromiseEdgeInput> traversalPromiseQueryBuilderFactory;
     //endregion
 }

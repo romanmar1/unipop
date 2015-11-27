@@ -969,7 +969,7 @@ public class QueryBuilder implements Cloneable{
         //region Composite Implementation
         @Override
         protected Object build() {
-            if (this.value instanceof Iterable) {
+            if (this.value != null && Iterable.class.isAssignableFrom(this.value.getClass())) {
                 return FilterBuilders.termsFilter(this.getFieldName(), StreamSupport.stream(((Iterable)value).spliterator(), false).toArray());
             }
 

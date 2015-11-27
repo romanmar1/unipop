@@ -32,18 +32,16 @@ public class DualIdPromiseAggregationQueryAppender extends DualPromiseQueryAppen
             Optional<Direction> direction,
             QueryBuilderFactory<IdPromiseEdgeInput> idPromiseQueryBuilderFactory,
             QueryBuilderFactory<TraversalPromiseEdgeInput> traversalPromiseQueryBuilderFactory) {
-        super(graph, schemaProvider, direction, traversalPromiseQueryBuilderFactory);
+        super(graph, schemaProvider, direction);
         this.idPromiseQueryBuilderFactory = idPromiseQueryBuilderFactory;
+        this.traversalPromiseQueryBuilderFactory = traversalPromiseQueryBuilderFactory;
     }
     //endregion
 
     //region DualPromiseQueryAppenderBase Implementation
     @Override
     public boolean append(PromiseBulkInput input) {
-        Iterable<GraphEdgeSchema> edgeSchemas = getAllEdgeSchemasFromTypes(input.getTypesToQuery());
-        if (StreamSupport.stream(edgeSchemas.spliterator(), false).count() == 0) {
-            return false;
-        }
+        Iterable<GraphEdgeSchema> edgeSchemas = getAllDualEdgeSchemasFromTypes(input.getTypesToQuery());
 
         Set<String> sourceIdFields = StreamSupport.stream(edgeSchemas.spliterator(), false)
                 .map(edgeSchema -> edgeSchema.getSource().get().getIdField())
@@ -56,7 +54,7 @@ public class DualIdPromiseAggregationQueryAppender extends DualPromiseQueryAppen
         if (sourceIdFields.size() == 1) {
             input.getSearchBuilder().getAggregationBuilder().seekRoot().filters(PromiseStringConstants.BULK_ID_PROMISES)
                     // filtering relevant data to aggregate
-                    .filter("IdsPromiseFilter", idPromiseQueryBuilder).seek(PromiseStringConstants.BULK_ID_PROMISES)
+                    .filter("IdPromiseFilter", idPromiseQueryBuilder).seek(PromiseStringConstants.BULK_ID_PROMISES)
                     // aggregate by relevant field
                     .terms(sourceIdFields.iterator().next())
                     .field(sourceIdFields.iterator().next())
@@ -113,5 +111,6 @@ public class DualIdPromiseAggregationQueryAppender extends DualPromiseQueryAppen
 
     //region Fields
     private QueryBuilderFactory<IdPromiseEdgeInput> idPromiseQueryBuilderFactory;
+    protected QueryBuilderFactory<TraversalPromiseEdgeInput> traversalPromiseQueryBuilderFactory;
     //endregion
 }

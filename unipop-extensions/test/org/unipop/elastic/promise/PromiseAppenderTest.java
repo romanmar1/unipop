@@ -10,10 +10,7 @@ import org.junit.Test;
 import org.unipop.elastic.controller.promise.IdPromise;
 import org.unipop.elastic.controller.promise.TraversalPromise;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.*;
-import org.unipop.elastic.controller.promise.helpers.queryAppenders.dual.DualIdPromiseAggregationQueryAppender;
-import org.unipop.elastic.controller.promise.helpers.queryAppenders.dual.DualIdPromiseQueryAppender;
-import org.unipop.elastic.controller.promise.helpers.queryAppenders.dual.DualTraversalPromiseAggregationQueryAppender;
-import org.unipop.elastic.controller.promise.helpers.queryAppenders.dual.DualTraversalPromiseQueryAppender;
+import org.unipop.elastic.controller.promise.helpers.queryAppenders.dual.*;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.*;
 import org.unipop.elastic.controller.schema.helpers.SearchBuilder;
 import org.unipop.elastic.controller.schema.helpers.queryAppenders.CompositeQueryAppender;
@@ -37,16 +34,14 @@ public class PromiseAppenderTest {
 
         QueryBuilderFactory<IdPromiseEdgeInput> idPromiseQueryBuilderFactory = new IdPromiseEdgeQueryBuilderFactory();
 
-        this.queryAppender = new PromiseBulkQueryAppender(
-                null,
-                new SimpleSchemaProvider(),
-                Optional.of(Direction.OUT),
+        this.queryAppender =
                 new CompositeQueryAppender<PromiseBulkInput>(
-                        CompositeQueryAppender.Mode.All,
-                        new DualIdPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT), idPromiseQueryBuilderFactory, traversalPromiseQueryBuilderFactory),
-                        new DualIdPromiseAggregationQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT), idPromiseQueryBuilderFactory, traversalPromiseQueryBuilderFactory),
-                        new DualTraversalPromiseQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT), traversalPromiseQueryBuilderFactory),
-                        new DualTraversalPromiseAggregationQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT), traversalPromiseQueryBuilderFactory)));
+                    CompositeQueryAppender.Mode.All,
+                    new DualPromiseTypesQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT)),
+                    new DualPromiseDirectionQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT)),
+                    new DualPromiseFilterQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT), idPromiseQueryBuilderFactory, traversalPromiseQueryBuilderFactory),
+                    new DualIdPromiseAggregationQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT), idPromiseQueryBuilderFactory, traversalPromiseQueryBuilderFactory),
+                    new DualTraversalPromiseAggregationQueryAppender(null, new SimpleSchemaProvider(), Optional.of(Direction.OUT), traversalPromiseQueryBuilderFactory));
     }
 
     @Test

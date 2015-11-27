@@ -29,14 +29,15 @@ public class DualTraversalPromiseAggregationQueryAppender extends DualPromiseQue
             GraphElementSchemaProvider schemaProvider,
             Optional<Direction> direction,
             QueryBuilderFactory<TraversalPromiseEdgeInput> traversalPromiseQueryBuilderFactory) {
-        super(graph, schemaProvider, direction, traversalPromiseQueryBuilderFactory);
+        super(graph, schemaProvider, direction);
+        this.traversalPromiseQueryBuilderFactory = traversalPromiseQueryBuilderFactory;
     }
     //endregion
 
     //region GraphQueryAppenderBase Implementation
     @Override
     public boolean append(PromiseBulkInput input) {
-        Iterable<GraphEdgeSchema> edgeSchemas = getAllEdgeSchemasFromTypes(input.getTypesToQuery());
+        Iterable<GraphEdgeSchema> edgeSchemas = getAllDualEdgeSchemasFromTypes(input.getTypesToQuery());
 
         // aggregation layer 1
         for(TraversalPromise traversalPromise : input.getTraversalPromisesBulk()) {
@@ -96,4 +97,7 @@ public class DualTraversalPromiseAggregationQueryAppender extends DualPromiseQue
     }
     //endregion
 
+    //region Fields
+    protected QueryBuilderFactory<TraversalPromiseEdgeInput> traversalPromiseQueryBuilderFactory;
+    //endregion
 }
