@@ -6,18 +6,17 @@ import org.apache.tinkerpop.gremlin.process.GremlinProcessRunner;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
-import org.apache.tinkerpop.gremlin.process.traversal.step.filter.HasStep;
-import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.structure.Edge;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.jooq.lambda.Seq;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.unipop.elastic.controller.promise.*;
 
-import java.util.*;
-import java.util.stream.StreamSupport;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Roman on 11/17/2015.
@@ -250,5 +249,14 @@ public class PromiseEdgeTest extends AbstractGremlinTest {
 
             Assert.assertEquals("java", edge.outVertex().id().toString());
         });
+    }
+
+    @Test
+    @LoadGraphWith(LoadGraphWith.GraphData.MODERN)
+    public void promisePredicatesStrategy() {
+        Traversal traversal = g.V().outE().out().has("bla",2).has("anotherBla", P.within((new ArrayList<Integer>()).add(666)));
+
+        printTraversalForm(traversal);
+        int x = 5;
     }
 }

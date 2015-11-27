@@ -8,8 +8,10 @@ import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.node.Node;
 import org.unipop.controllerprovider.ControllerManagerFactory;
+import org.unipop.elastic.controller.promise.strategy.PromiseStrategyRegistrar;
 import org.unipop.elastic.controller.schema.SchemaControllerManager;
 import org.unipop.elastic.controller.schema.helpers.ElasticGraphConfiguration;
+import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.elastic.helpers.ElasticClientFactory;
 import org.unipop.elastic.helpers.ElasticHelper;
 import org.unipop.elastic.controller.promise.PromiseControllerManager;
@@ -56,12 +58,13 @@ public class PromiseGraphProvider extends AbstractGraphProvider {
 
     @Override
     public Configuration newGraphConfiguration(String graphName, Class<?> test, String testMethodName, Map<String, Object> configurationOverrides, LoadGraphWith.GraphData loadGraphWith) {
+        GraphElementSchemaProvider schemaProvider = new ModernSimpleGraphElementSchemaProvider(graphName.toLowerCase());
         Configuration configuration = super.newGraphConfiguration(graphName, test, testMethodName, configurationOverrides, loadGraphWith);
         configuration.setProperty("controllerManagerFactory", (ControllerManagerFactory)() -> new PromiseControllerManager());
         configuration.setProperty("strategyRegistrar", new BasicStrategyRegistrar());
 
         ElasticGraphConfiguration elasticConfiguration = new ElasticGraphConfiguration(configuration);
-        elasticConfiguration.setElasticGraphSchemaProviderFactory(() -> new ModernSimpleGraphElementSchemaProvider(graphName.toLowerCase()));
+        elasticConfiguration.setElasticGraphSchemaProviderFactory(() -> schemaProvider);
         elasticConfiguration.setElasticGraphDefaultSearchSize(10000);
         elasticConfiguration.setElasticGraphScrollSize(1000);
         elasticConfiguration.setElasticGraphAggregationsDefaultTermsSize(100000);
