@@ -68,7 +68,7 @@ public class DualIdPromiseAggregationQueryAppender extends DualPromiseQueryAppen
                     // aggregate by relevant field
                     .terms(sourceIdFields.iterator().next())
                     .field(sourceIdFields.iterator().next())
-                    .size(0).shardSize(0).executionHint(ExecutionHintStrings.GLOBAL_ORIDNAL_HASH);
+                    .size(0).shardSize(0).executionHint(ExecutionHintStrings.GLOBAL_ORIDNALS_HASH);
             firstAggregationLayerName = sourceIdFields.iterator().next();
         } else {
             // If there are multiple source id fields we can't use terms aggregation as that would create inaccurate aggregation
