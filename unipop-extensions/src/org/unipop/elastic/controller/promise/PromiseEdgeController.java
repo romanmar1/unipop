@@ -14,6 +14,7 @@ import org.unipop.elastic.controller.promise.helpers.elementConverters.map.*;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.*;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.dual.*;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.*;
+import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.provider.TraversalConcatIdProvider;
 import org.unipop.elastic.controller.schema.helpers.*;
 import org.unipop.elastic.controller.schema.helpers.aggregationConverters.CompositeAggregation;
 import org.unipop.elastic.controller.schema.helpers.elementConverters.CompositeElementConverter;
@@ -55,7 +56,7 @@ public class PromiseEdgeController implements EdgeController {
     //region EdgeController Implementation
     @Override
     public Iterator<BaseEdge> edges(Predicates predicates) {
-        /*if (predicates.hasContainers == null || predicates.hasContainers.size() == 0) {
+        if (predicates.hasContainers == null || predicates.hasContainers.size() == 0) {
             // promise all edges
             return StreamSupport.stream(Spliterators.spliteratorUnknownSize(this.innerEdgeController.edges(predicates), 0), false)
                     .flatMap(edge -> StreamSupport.stream(this.elementConverter.convert(edge).spliterator(), false))
@@ -79,8 +80,6 @@ public class PromiseEdgeController implements EdgeController {
         }
 
         SearchBuilder searchBuilder = buildEdgePromiseQuery(inHasContainers, outHasContainers, edgeHasContainers);
-
-        return null;*/
 
         return Collections.emptyIterator();
     }
@@ -302,7 +301,7 @@ public class PromiseEdgeController implements EdgeController {
 
     private QueryAppender<PromiseBulkInput> getQueryAppender(Direction direction) {
         QueryBuilderFactory<TraversalPromiseEdgeInput> traversalPromiseQueryBuilderFactory = new CachedTraversalPromiseEdgeQueryBuilderFactory<>(
-                new TraversalPromiseEdgeQueryBuilderFactory()
+                new TraversalPromiseEdgeQueryBuilderFactory(new TraversalConcatIdProvider())
         );
 
         QueryBuilderFactory<IdPromiseEdgeInput> idPromiseQueryBuilderFactory = new IdPromiseEdgeQueryBuilderFactory();

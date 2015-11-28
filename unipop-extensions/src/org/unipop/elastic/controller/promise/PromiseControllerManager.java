@@ -22,9 +22,12 @@ import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElement
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProviderFactory;
 import org.unipop.elastic.helpers.*;
 import org.unipop.elastic.controller.promise.helpers.elementConverters.PromiseVertexConverter;
+import org.unipop.structure.BaseEdge;
+import org.unipop.structure.BaseVertex;
 import org.unipop.structure.UniGraph;
 
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Created by Roman on 11/16/2015.
@@ -62,8 +65,11 @@ public class PromiseControllerManager extends BasicControllerManager {
 
         client = ElasticClientFactory.create(elasticConfiguration);
 
-        String indexName = configuration.getString("graphName", "graph");
-        ElasticHelper.createIndex(indexName, client);
+        this.isReadOnly = configuration.getBoolean("isReadOnly", true);
+        if (!this.isReadOnly) {
+            String indexName = configuration.getString("graphName", "graph");
+            ElasticHelper.createIndex(indexName, client);
+        }
 
         ElasticMutations elasticMutations = new ElasticSchemaGraphMutations(this.schemaProvider, false, client, new TimingAccessor());
         LazyGetterFactory lazyGetterFactory = new LazyGetterFactory(client, schemaProvider);
@@ -109,6 +115,16 @@ public class PromiseControllerManager extends BasicControllerManager {
             isClosed = true;
         }
     }
+
+    @Override
+    public BaseEdge addEdge(Object edgeId, String label, BaseVertex outV, BaseVertex inV, Map<String, Object> properties) {
+        return this.isReadOnly ? null : super.addEdge(edgeId, label, outV, inV, properties);
+    }
+
+    @Override
+    public BaseVertex addVertex(Object id, String label, Map<String, Object> properties) {
+        return this.isReadOnly ? null : super.addVertex(id, label, properties);
+    }
     //endregion
 
     //region Fields
@@ -119,5 +135,6 @@ public class PromiseControllerManager extends BasicControllerManager {
 
     private Client client;
     private boolean isClosed;
+    private boolean isReadOnly;
     //endregion
 }

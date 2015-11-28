@@ -62,6 +62,7 @@ public class PromiseGraphProvider extends AbstractGraphProvider {
         Configuration configuration = super.newGraphConfiguration(graphName, test, testMethodName, configurationOverrides, loadGraphWith);
         configuration.setProperty("controllerManagerFactory", (ControllerManagerFactory)() -> new PromiseControllerManager());
         configuration.setProperty("strategyRegistrar", new BasicStrategyRegistrar());
+        configuration.setProperty("isReadOnly", false);
 
         ElasticGraphConfiguration elasticConfiguration = new ElasticGraphConfiguration(configuration);
         elasticConfiguration.setElasticGraphSchemaProviderFactory(() -> schemaProvider);
