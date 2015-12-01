@@ -1,5 +1,6 @@
 package org.unipop.elastic.controller.promise.helpers.elementConverters.map;
 
+import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.jooq.lambda.Seq;
@@ -9,6 +10,7 @@ import org.unipop.elastic.controller.promise.PromiseVertex;
 import org.unipop.elastic.controller.promise.TraversalPromise;
 import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
 import org.unipop.elastic.controller.schema.helpers.MapHelper;
+import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.structure.UniGraph;
 
 import java.util.ArrayList;
@@ -23,9 +25,11 @@ public class TraversalToTraversalMapEdgeConverter extends GraphPromiseMapEdgeCon
     public TraversalToTraversalMapEdgeConverter(
             UniGraph graph,
             Direction direction,
+            Iterable<HasContainer> edgeAggPromiseHasContainers,
+            GraphElementSchemaProvider schemaProvider,
             Iterable<TraversalPromise> bulkTraversalPromises,
             Iterable<TraversalPromise> predicatesTraversalPromises) {
-        super(graph, direction);
+        super(graph, direction, edgeAggPromiseHasContainers, schemaProvider);
 
         this.bulkTraversalPromises = Seq.seq(bulkTraversalPromises).groupBy(traversalPromise -> traversalPromise.getId());
         this.predicatesTraversalPromises = Seq.seq(predicatesTraversalPromises).groupBy(traversalPromise -> traversalPromise.getId());
@@ -73,7 +77,7 @@ public class TraversalToTraversalMapEdgeConverter extends GraphPromiseMapEdgeCon
                             new PromiseVertex(this.getPredicateTraversalPromiseById(layerTwoEntry.getKey()), this.graph) :
                             new PromiseVertex(this.getBulkTraversalPromiseById(layerOneEntry.getKey()), this.graph);
 
-                    edges.add(new PromiseEdge(super.getEdgeId(outVertex, inVertex), outVertex, inVertex, this.graph));
+                    edges.add(new PromiseEdge(super.getEdgeId(outVertex, inVertex), outVertex, inVertex, edgeProperties, this.graph));
                 }
             }
         }

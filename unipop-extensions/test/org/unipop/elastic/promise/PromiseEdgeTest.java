@@ -61,6 +61,8 @@ public class PromiseEdgeTest extends AbstractGremlinTest {
             Seq.seq(Arrays.asList(edge.inVertex(), edge.outVertex())).cast(PromiseVertex.class).forEach(vertex -> {
                 Assert.assertEquals(IdPromise.class, vertex.getPromise().getClass());
             });
+
+            Assert.assertEquals(1L, edge.property("count").value());
         });
     }
 
@@ -77,6 +79,8 @@ public class PromiseEdgeTest extends AbstractGremlinTest {
             Seq.seq(Arrays.asList(edge.inVertex(), edge.outVertex())).cast(PromiseVertex.class).forEach(vertex -> {
                 Assert.assertEquals(IdPromise.class, vertex.getPromise().getClass());
             });
+
+            Assert.assertEquals(1L, edge.property("count").value());
         });
     }
 
@@ -93,6 +97,8 @@ public class PromiseEdgeTest extends AbstractGremlinTest {
             Seq.seq(Arrays.asList(edge.inVertex(), edge.outVertex())).cast(PromiseVertex.class).forEach(vertex -> {
                 Assert.assertEquals(IdPromise.class, vertex.getPromise().getClass());
             });
+
+            Assert.assertEquals(1L, edge.property("count").value());
         });
 
         Map<String, List<Edge>> edgeGroupBy = Seq.seq(edges).groupBy(edge -> edge.id().toString());
@@ -113,6 +119,8 @@ public class PromiseEdgeTest extends AbstractGremlinTest {
             Seq.seq(Arrays.asList(edge.inVertex(), edge.outVertex())).cast(PromiseVertex.class).forEach(vertex -> {
                 Assert.assertEquals(IdPromise.class, vertex.getPromise().getClass());
             });
+
+            Assert.assertEquals(1L, edge.property("count").value());
         });
     }
 
@@ -129,6 +137,8 @@ public class PromiseEdgeTest extends AbstractGremlinTest {
             Seq.seq(Arrays.asList(edge.inVertex(), edge.outVertex())).cast(PromiseVertex.class).forEach(vertex -> {
                 Assert.assertEquals(IdPromise.class, vertex.getPromise().getClass());
             });
+
+            Assert.assertEquals(1L, edge.property("count").value());
         });
     }
 
@@ -145,6 +155,8 @@ public class PromiseEdgeTest extends AbstractGremlinTest {
             Seq.seq(Arrays.asList(edge.inVertex(), edge.outVertex())).cast(PromiseVertex.class).forEach(vertex -> {
                 Assert.assertEquals(IdPromise.class, vertex.getPromise().getClass());
             });
+
+            Assert.assertEquals(1L, edge.property("count").value());
         });
     }
 
@@ -161,6 +173,8 @@ public class PromiseEdgeTest extends AbstractGremlinTest {
             Seq.seq(Arrays.asList(edge.inVertex(), edge.outVertex())).cast(PromiseVertex.class).forEach(vertex -> {
                 Assert.assertEquals(IdPromise.class, vertex.getPromise().getClass());
             });
+
+            Assert.assertEquals(1L, edge.property("count").value());
         });
     }
 
@@ -177,6 +191,8 @@ public class PromiseEdgeTest extends AbstractGremlinTest {
 
             Assert.assertEquals(IdPromise.class, ((PromiseVertex)edge.inVertex()).getPromise().getClass());
             Assert.assertEquals(TraversalPromise.class, ((PromiseVertex)edge.outVertex()).getPromise().getClass());
+
+            Assert.assertEquals(1L, edge.property("count").value());
         });
     }
 
@@ -201,6 +217,8 @@ public class PromiseEdgeTest extends AbstractGremlinTest {
 
             Assert.assertEquals(IdPromise.class, ((PromiseVertex)edge.inVertex()).getPromise().getClass());
             Assert.assertEquals(TraversalPromise.class, ((PromiseVertex)edge.outVertex()).getPromise().getClass());
+
+            Assert.assertEquals(1L, edge.property("count").value());
         });
     }
 
@@ -221,6 +239,8 @@ public class PromiseEdgeTest extends AbstractGremlinTest {
 
             Assert.assertEquals("marko", edge.outVertex().id().toString());
             Assert.assertEquals("java", edge.inVertex().id().toString());
+
+            Assert.assertEquals(1L, edge.property("count").value());
         });
     }
 
@@ -249,12 +269,17 @@ public class PromiseEdgeTest extends AbstractGremlinTest {
 
             Assert.assertEquals("java", edge.outVertex().id().toString());
         });
+
+        List<Long> counts = Seq.seq(edges).map(edge -> (Long)edge.property("count").value()).sorted().toList();
+        Assert.assertEquals((Long)1L, (Long)counts.get(0));
+        Assert.assertEquals((Long)1L, (Long)counts.get(1));
+        Assert.assertEquals((Long)2L, (Long)counts.get(2));
     }
 
     @Test
     @LoadGraphWith(LoadGraphWith.GraphData.MODERN)
     public void promisePredicatesStrategy() {
-        Traversal traversal = g.V().outE().out().has("bla",2).has("anotherBla", P.within((new ArrayList<Integer>()).add(666)));
+        Traversal traversal = g.V().out().out().has("bla",2).has("anotherBla", P.within(Arrays.asList(666)));
 
         printTraversalForm(traversal);
         int x = 5;

@@ -1,8 +1,10 @@
 package org.unipop.elastic.promise;
 
+import org.unipop.elastic.controller.promise.schemaProviders.GraphPromiseEdgeSchema;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.*;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 /**
@@ -51,9 +53,10 @@ public class ModernSimpleGraphElementSchemaProvider implements GraphElementSchem
                             return null;
                     }
                 } else {
-                    return null;
+                    return Optional.empty();
                 }
-            default: return null;
+            case "promise": return Optional.of(getPromiseEdgeSchema());
+            default: return Optional.empty();
         }
     }
 
@@ -355,6 +358,80 @@ public class ModernSimpleGraphElementSchemaProvider implements GraphElementSchem
             @Override
             public Iterable<String> getIndices() {
                 return Arrays.asList(indexName);
+            }
+        };
+    }
+
+    public GraphPromiseEdgeSchema getPromiseEdgeSchema() {
+        return new GraphPromiseEdgeSchema() {
+            @Override
+            public Iterable<Property> getProperties() {
+                return Arrays.asList(new Property() {
+                    @Override
+                    public String getName() {
+                        return "count";
+                    }
+                });
+            }
+
+            @Override
+            public Optional<End> getSource() {
+                return Optional.of(new End() {
+                    @Override
+                    public String getIdField() {
+                        return null;
+                    }
+
+                    @Override
+                    public Optional<String> getType() {
+                        return Optional.of("promise");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
+                });
+            }
+
+            @Override
+            public Optional<End> getDestination() {
+                return Optional.of(new End() {
+                    @Override
+                    public String getIdField() {
+                        return null;
+                    }
+
+                    @Override
+                    public Optional<String> getType() {
+                        return Optional.of("promise");
+                    }
+
+                    @Override
+                    public Optional<GraphEdgeRedundancy> getEdgeRedundancy() {
+                        return Optional.empty();
+                    }
+                });
+            }
+
+            @Override
+            public Optional<Direction> getDirection() {
+                return Optional.empty();
+            }
+
+            @Override
+            public String getType() {
+                return "promise";
+            }
+
+            @Override
+            public Optional<GraphElementRouting> getRouting() {
+                return Optional.empty();
+            }
+
+            @Override
+            public Iterable<String> getIndices() {
+                return Collections.emptyList();
             }
         };
     }

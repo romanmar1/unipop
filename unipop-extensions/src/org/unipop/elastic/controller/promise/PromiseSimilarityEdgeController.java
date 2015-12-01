@@ -130,6 +130,7 @@ public class PromiseSimilarityEdgeController implements EdgeController {
                 idPromises,
                 Collections.emptyList(),
                 Collections.emptyList(),
+                Collections.emptyList(),
                 Seq.seq(this.schemaProvider.getVertexTypes()).toList(),
                 searchBuilder);
 

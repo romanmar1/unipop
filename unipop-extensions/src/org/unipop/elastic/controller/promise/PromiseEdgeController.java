@@ -15,6 +15,7 @@ import org.unipop.elastic.controller.promise.helpers.queryAppenders.*;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.dual.*;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.*;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.provider.TraversalConcatIdProvider;
+import org.unipop.elastic.controller.promise.schemaProviders.GraphPromiseEdgeSchema;
 import org.unipop.elastic.controller.schema.helpers.*;
 import org.unipop.elastic.controller.schema.helpers.aggregationConverters.CompositeAggregation;
 import org.unipop.elastic.controller.schema.helpers.elementConverters.CompositeElementConverter;
@@ -95,8 +96,17 @@ public class PromiseEdgeController implements EdgeController {
             throw new UnsupportedOperationException("Single \"" + PREDICATES_PROMISE + "\" allowed");
         }
 
-        List<HasContainer> edgeHasContainers = predicates.hasContainers.stream()
-                .filter(hasContainer -> !predicatesPromiseHasContainers.contains(hasContainer)).collect(Collectors.toList());
+        Optional<GraphEdgeSchema> promiseEdgeSchema = this.schemaProvider.getEdgeSchema("promise", Optional.of("promise"), Optional.of("promise"));
+        List<GraphPromiseEdgeSchema.Property> promiseProperties =
+                !promiseEdgeSchema.isPresent() || GraphPromiseEdgeSchema.class.isAssignableFrom(promiseEdgeSchema.get().getClass()) ?
+                    Collections.emptyList() : Seq.seq(((GraphPromiseEdgeSchema)promiseEdgeSchema.get()).getProperties()).toList();
+
+        List<HasContainer> edgeAggPromiseHasContainers = Seq.seq(predicates.hasContainers)
+                .filter(hasContainer ->  promiseProperties.contains(hasContainer.getKey())).toList();
+
+        List<HasContainer> edgeHasContainers = Seq.seq(predicates.hasContainers)
+                .filter(hasContainer -> !predicatesPromiseHasContainers.contains(hasContainer) && !edgeAggPromiseHasContainers.contains(hasContainer))
+                .toList();
 
         Iterable<IdPromise> bulkIdPromises = getBulkIdPromises(Seq.of(vertices).cast(PromiseVertex.class).toList());
         Iterable<TraversalPromise> bulkTraversalPromises = getBulkTraversalPromises(Seq.of(vertices).cast(PromiseVertex.class).toList());
@@ -107,6 +117,7 @@ public class PromiseEdgeController implements EdgeController {
                 bulkTraversalPromises,
                 predicatesTraversalPromises,
                 edgeLabels,
+                edgeAggPromiseHasContainers,
                 edgeHasContainers,
                 direction);
 
@@ -125,7 +136,13 @@ public class PromiseEdgeController implements EdgeController {
                 AggregationHelper.getAggregationConverter(searchBuilder.getAggregationBuilder(), false)
                 .convert(compositeAggregation);
 
-        return Seq.seq(this.getElementConverter(bulkTraversalPromises, predicatesTraversalPromises, direction).convert(result)).cast(BaseEdge.class).iterator();
+        ElementConverter<Map<String, Object>, Element> elementConverter = this.getElementConverter(
+                bulkTraversalPromises,
+                predicatesTraversalPromises,
+                edgeAggPromiseHasContainers,
+                direction);
+
+        return Seq.seq(elementConverter.convert(result)).cast(BaseEdge.class).iterator();
     }
 
     @Override
@@ -160,6 +177,7 @@ public class PromiseEdgeController implements EdgeController {
             Iterable<TraversalPromise> bulkTraversalPromises,
             Iterable<TraversalPromise> predicatesTraversalPromises,
             String[] edgeLabels,
+            Iterable<HasContainer> edgeAggPromiseHasContainers,
             Iterable<HasContainer> edgeHasContainers,
             Direction direction) {
         SearchBuilder searchBuilder = buildPromiseEdgePredicatesQuery(edgeHasContainers, edgeLabels);
@@ -168,6 +186,7 @@ public class PromiseEdgeController implements EdgeController {
                 bulkIdPromises,
                 bulkTraversalPromises,
                 predicatesTraversalPromises,
+                edgeAggPromiseHasContainers,
                 searchBuilder.getTypes(),
                 searchBuilder);
 
@@ -331,14 +350,15 @@ public class PromiseEdgeController implements EdgeController {
     private ElementConverter<Map<String, Object>, Element> getElementConverter(
             Iterable<TraversalPromise> bulkTraversalPromises,
             Iterable<TraversalPromise> predicatesTraversalPromises,
+            Iterable<HasContainer> edgeAggPromiseHasContainers,
             Direction direction) {
-        return new MapDistinctEdgeConverter(this.graph, direction,
+        return new MapDistinctEdgeConverter(this.graph, direction, edgeAggPromiseHasContainers, this.schemaProvider,
             new CompositeElementConverter<Map<String, Object>, Element>(
                     CompositeElementConverter.Mode.All,
-                    new IdToIdMapEdgeConverter(this.graph, direction),
-                    new IdToTraversalMapEdgeConverter(this.graph, direction, predicatesTraversalPromises),
-                    new TraversalToIdMapEdgeConverter(this.graph, direction, bulkTraversalPromises),
-                    new TraversalToTraversalMapEdgeConverter(this.graph, direction, bulkTraversalPromises, predicatesTraversalPromises)));
+                    new IdToIdMapEdgeConverter(this.graph, direction, edgeAggPromiseHasContainers, this.schemaProvider),
+                    new IdToTraversalMapEdgeConverter(this.graph, direction, edgeAggPromiseHasContainers, this.schemaProvider, predicatesTraversalPromises),
+                    new TraversalToIdMapEdgeConverter(this.graph, direction, edgeAggPromiseHasContainers, this.schemaProvider, bulkTraversalPromises),
+                    new TraversalToTraversalMapEdgeConverter(this.graph, direction, edgeAggPromiseHasContainers, this.schemaProvider, bulkTraversalPromises, predicatesTraversalPromises)));
     }
     //endregion
 

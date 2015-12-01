@@ -29,6 +29,7 @@ public class PromiseStrategyRegistrar extends BasicStrategyRegistrar {
                     //add strategies here
                     new UniGraphStartStepStrategy(),
                     new UniGraphVertexStepStrategy(),
+                    new UniGraphPredicatesStrategy(),
                     new PromisePredicatesStrategy(schemaProvider)
             );
 
