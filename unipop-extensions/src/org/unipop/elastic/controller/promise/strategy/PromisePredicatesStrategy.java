@@ -2,18 +2,23 @@ package org.unipop.elastic.controller.promise.strategy;
 
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.TraversalStrategy;
+import org.apache.tinkerpop.gremlin.process.traversal.step.filter.HasStep;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.process.traversal.strategy.AbstractTraversalStrategy;
 import org.apache.tinkerpop.gremlin.process.traversal.util.TraversalHelper;
+import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.jooq.lambda.Seq;
 import org.unipop.elastic.controller.Predicates;
+import org.unipop.elastic.controller.promise.schemaProviders.GraphPromiseEdgeSchema;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphEdgeRedundancy;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphEdgeSchema;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.process.UniGraphStartStep;
 import org.unipop.process.UniGraphVertexStep;
 import org.unipop.process.strategy.HasContainersToPredicatesTransformer;
+import org.unipop.process.strategy.UniGraphPredicatesStrategy;
 import org.unipop.process.strategy.UniGraphStartStepStrategy;
 import org.unipop.process.strategy.UniGraphVertexStepStrategy;
 import org.unipop.structure.UniGraph;
@@ -37,85 +42,36 @@ public class PromisePredicatesStrategy extends AbstractTraversalStrategy<Travers
         Set<Class<? extends TraversalStrategy.VendorOptimizationStrategy>> priorStrategies = new HashSet<>();
         priorStrategies.add(UniGraphStartStepStrategy.class);
         priorStrategies.add(UniGraphVertexStepStrategy.class);
+        priorStrategies.add(UniGraphPredicatesStrategy.class);
         return priorStrategies;
     }
 
-    @Override
     public void apply(Traversal.Admin<?, ?> traversal) {
-        if(traversal.getEngine().isComputer()) {
+        Optional<GraphEdgeSchema> edgeSchema = this.schemaProvider.getEdgeSchema("promise", Optional.of("promise"), Optional.of("promise"));
+        if (!edgeSchema.isPresent() || !GraphPromiseEdgeSchema.class.isAssignableFrom(edgeSchema.get().getClass())) {
             return;
         }
 
-        Graph graph = traversal.getGraph().get();
-        if(!(graph instanceof UniGraph)) {
+        List<String> promisePropertyNames = Seq.seq(((GraphPromiseEdgeSchema)edgeSchema.get()).getProperties())
+                .map(property -> property.getName())
+                .toList();
+
+        if (promisePropertyNames == null || promisePropertyNames.isEmpty()) {
             return;
         }
 
-        HasContainersToPredicatesTransformer collector = new HasContainersToPredicatesTransformer();
+        TraversalHelper.getStepsOfAssignableClassRecursively(UniGraphVertexStep.class, traversal).forEach(uniGraphVertexStep -> {
+            if (Edge.class.isAssignableFrom(uniGraphVertexStep.getReturnClass())) {
+                List<HasContainer> promisePropertyHasContainers = Seq.seq(uniGraphVertexStep.getPredicates().hasContainers)
+                        .filter(hasContainer -> promisePropertyNames.contains(hasContainer.getKey()))
+                        .toList();
 
-        TraversalHelper.getStepsOfAssignableClassRecursively(UniGraphStartStep.class, traversal).forEach(elasticGraphStep -> {
-            if(elasticGraphStep.getIds().length == 0) {
-                //TODO: think if this case should handle promises as well
-                Predicates predicates = collector.transformAndRemove(elasticGraphStep.getNextStep(), traversal);
-                elasticGraphStep.getPredicates().hasContainers.addAll(predicates.hasContainers);
-                elasticGraphStep.getPredicates().labels.addAll(predicates.labels);
-                elasticGraphStep.getPredicates().labels.forEach(label -> elasticGraphStep.addLabel(label));
-                elasticGraphStep.getPredicates().limitHigh = predicates.limitHigh;
+                promisePropertyHasContainers.forEach(hasContainer -> uniGraphVertexStep.getPredicates().hasContainers.remove(hasContainer));
+
+                HasStep promisePropertyHasStep = new HasStep(traversal, Seq.seq(promisePropertyHasContainers).toArray(HasContainer[]::new));
+                TraversalHelper.insertAfterStep(promisePropertyHasStep, uniGraphVertexStep, traversal);
             }
         });
-
-        TraversalHelper.getStepsOfAssignableClassRecursively(UniGraphVertexStep.class, traversal).forEach(elasticVertexStep -> {
-            boolean returnVertex = elasticVertexStep.getReturnClass().equals(Vertex.class);
-            Predicates predicates;
-            if (returnVertex) {
-                predicates = collector.transformAndRemove(elasticVertexStep.getNextStep(), traversal);
-                Iterable<String> labels = (elasticVertexStep.getEdgeLabels() != null && elasticVertexStep.getEdgeLabels().length != 0) ?
-                        Arrays.asList(elasticVertexStep.getEdgeLabels()) :
-                        schemaProvider.getEdgeTypes();
-                predicates.hasContainers = translateToEdgeRedundantProperties(labels, predicates.hasContainers);
-            } else {
-                predicates = new Predicates();
-            }
-            
-            elasticVertexStep.getPredicates().hasContainers.addAll(predicates.hasContainers);
-            elasticVertexStep.getPredicates().labels.addAll(predicates.labels);
-            elasticVertexStep.getPredicates().labels.forEach(label -> elasticVertexStep.addLabel(label));
-            elasticVertexStep.getPredicates().limitHigh = predicates.limitHigh;
-        });
-    }
-    //endregion
-
-    private ArrayList<HasContainer> translateToEdgeRedundantProperties(Iterable<String> labels, List<HasContainer> hasContainers) {
-        HashMap<String, HasContainer> newHasContainers = new HashMap();
-        // for each label
-        for (String label : labels) {
-            if (schemaProvider.getEdgeSchemas(label).isPresent()) {
-                // for each schema of the label
-                for (GraphEdgeSchema edgeSchema : schemaProvider.getEdgeSchemas(label).get()) {
-                    if (edgeSchema.getDestination().isPresent()) {
-                        GraphEdgeSchema.End destination = edgeSchema.getDestination().get();
-                        // use label destination edge redundancy
-                        //TODO: handle singular case
-                        if (destination.getEdgeRedundancy().isPresent()) {
-                            GraphEdgeRedundancy edgeRedundancy = destination.getEdgeRedundancy().get();
-                            // transform each
-                            for (HasContainer hasContainer : hasContainers) {
-                                Optional<String> redundantProperty = edgeRedundancy.getRedundantPropertyName(hasContainer.getKey());
-                                if (redundantProperty.isPresent()) {
-                                    if (!newHasContainers.containsKey(hasContainer.toString())) {
-                                        newHasContainers.put(hasContainer.toString(), new HasContainer(redundantProperty.get(), hasContainer.getPredicate()));
-                                    }
-                                } else {
-                                    //TODO: no redundant data for property. should we do something?
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return new ArrayList<>(newHasContainers.values());
     }
 
     //region private fields

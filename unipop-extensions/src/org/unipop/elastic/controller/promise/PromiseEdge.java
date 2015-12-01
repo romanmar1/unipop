@@ -14,8 +14,8 @@ import java.util.Map;
  */
 public class PromiseEdge extends BaseEdge {
     //region Constructor
-    public PromiseEdge(Object id, Vertex outV, Vertex inV, UniGraph graph) {
-        super(id, "promise", null, outV, inV, null, graph);
+    public PromiseEdge(Object id, Vertex outV, Vertex inV, Map<String, Object> properties, UniGraph graph) {
+        super(id, "promise", properties, outV, inV, null, graph);
     }
     //endregion
 

@@ -39,6 +39,7 @@ public class PromiseEdgeConverter implements ElementConverter<Element, Element> 
                         element.id(),
                         new PromiseVertex(new IdPromise(outVertex.id()), this.graph),
                         new PromiseVertex(new IdPromise(inVertex.id()), this.graph),
+                        null,
                         this.graph));
     }
 

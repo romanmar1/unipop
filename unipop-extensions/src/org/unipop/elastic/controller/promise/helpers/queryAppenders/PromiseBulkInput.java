@@ -1,5 +1,6 @@
 package org.unipop.elastic.controller.promise.helpers.queryAppenders;
 
+import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.unipop.elastic.controller.promise.IdPromise;
 import org.unipop.elastic.controller.promise.TraversalPromise;
 import org.unipop.elastic.controller.schema.helpers.AggregationBuilder;
@@ -17,11 +18,13 @@ public class PromiseBulkInput {
             Iterable<IdPromise> bulkIdPromises,
             Iterable<TraversalPromise> bulkTraversalPromises,
             Iterable<TraversalPromise> predicatesTraversalPromises,
+            Iterable<HasContainer> edgeAggPromiseHasContainers,
             Iterable<String> typesToQuery,
             SearchBuilder searchBuilder) {
         this.bulkIdPromises = bulkIdPromises;
         this.bulkTraversalPromises = bulkTraversalPromises;
         this.predicatesTraversalPromises = predicatesTraversalPromises;
+        this.edgeAggPromiseHasContainers = edgeAggPromiseHasContainers;
         this.typesToQuery = typesToQuery;
         this.searchBuilder = searchBuilder;
     }
@@ -53,6 +56,7 @@ public class PromiseBulkInput {
     private Iterable<IdPromise> bulkIdPromises;
     private Iterable<TraversalPromise> bulkTraversalPromises;
     private Iterable<TraversalPromise> predicatesTraversalPromises;
+    private Iterable<HasContainer> edgeAggPromiseHasContainers;
     private Iterable<String> typesToQuery;
 
     private SearchBuilder searchBuilder;

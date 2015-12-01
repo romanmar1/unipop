@@ -52,6 +52,7 @@ public class PromiseAppenderTest {
                 Collections.<IdPromise>emptyList(),
                 Arrays.asList(new TraversalPromise("roman", __.has("age", P.eq(31)))),
                 Collections.<TraversalPromise>emptyList(),
+                Collections.emptyList(),
                 Arrays.asList("edge1"),
                 searchBuilder);
 
@@ -71,6 +72,7 @@ public class PromiseAppenderTest {
                         new TraversalPromise("karni", __.or(__.has("age", P.eq(31)), __.has("name", P.eq("gilad")), __.not(__.has("hair")))),
                         new TraversalPromise("doron", __.and(__.has("age", P.eq(25)), __.has("isStudying", P.eq(true))))),
                 Collections.<TraversalPromise>emptyList(),
+                Collections.emptyList(),
                 Arrays.asList("edge1"),
                 searchBuilder);
 
@@ -93,6 +95,7 @@ public class PromiseAppenderTest {
                         new TraversalPromise("roman", __.has("age", P.eq(31))),
                         new TraversalPromise("karni", __.or(__.has("age", P.eq(31)), __.has("name", P.eq("gilad")), __.not(__.has("hair")))),
                         new TraversalPromise("doron", __.and(__.has("age", P.eq(25)), __.has("isStudying", P.eq(true))))),
+                Collections.emptyList(),
                 Arrays.asList("edge1"),
                 searchBuilder);
 
@@ -109,6 +112,7 @@ public class PromiseAppenderTest {
                 Arrays.asList(new IdPromise(666)),
                 Collections.<TraversalPromise>emptyList(),
                 Collections.<TraversalPromise>emptyList(),
+                Collections.emptyList(),
                 Arrays.asList("edge1"),
                 searchBuilder);
 
@@ -126,6 +130,7 @@ public class PromiseAppenderTest {
                 Arrays.asList(new IdPromise(666), new IdPromise(123), new IdPromise(888)),
                 Collections.<TraversalPromise>emptyList(),
                 Collections.<TraversalPromise>emptyList(),
+                Collections.emptyList(),
                 Arrays.asList("edge1"),
                 searchBuilder);
 
@@ -146,6 +151,7 @@ public class PromiseAppenderTest {
                         new TraversalPromise("roman", __.has("age", P.eq(31))),
                         new TraversalPromise("karni", __.or(__.has("age", P.eq(31)), __.has("name", P.eq("gilad")), __.not(__.has("hair")))),
                         new TraversalPromise("doron", __.and(__.has("age", P.eq(25)), __.has("isStudying", P.eq(true))))),
+                Collections.emptyList(),
                 Arrays.asList("edge1"),
                 searchBuilder);
 
@@ -163,6 +169,7 @@ public class PromiseAppenderTest {
                 Arrays.asList(
                         new TraversalPromise("roman", __.has("age", P.eq(31)))),
                 Collections.<TraversalPromise>emptyList(),
+                Collections.emptyList(),
                 Arrays.asList("edge1"),
                 searchBuilder);
 
@@ -182,6 +189,7 @@ public class PromiseAppenderTest {
                         new TraversalPromise("karni", __.or(__.has("age", P.eq(31)), __.has("name", P.eq("gilad")), __.not(__.has("hair")))),
                         new TraversalPromise("doron", __.and(__.has("age", P.eq(25)), __.has("isStudying", P.eq(true))))),
                 Collections.<TraversalPromise>emptyList(),
+                Collections.emptyList(),
                 Arrays.asList("edge1"),
                 searchBuilder);
 
@@ -205,6 +213,7 @@ public class PromiseAppenderTest {
                         new TraversalPromise("roman", __.has("age", P.eq(31))),
                         new TraversalPromise("karni", __.or(__.has("age", P.eq(31)), __.has("name", P.eq("gilad")), __.not(__.has("hair")))),
                         new TraversalPromise("doron", __.and(__.has("age", P.eq(25)), __.has("isStudying", P.eq(true))))),
+                Collections.emptyList(),
                 Arrays.asList("edge1"),
                 searchBuilder);
 

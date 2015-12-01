@@ -1,11 +1,13 @@
 package org.unipop.elastic.controller.promise.helpers.elementConverters.map;
 
+import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.jooq.lambda.Seq;
 import org.unipop.elastic.controller.schema.helpers.elementConverters.ElementConverter;
+import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.structure.UniGraph;
 
 import java.util.Map;
@@ -15,8 +17,13 @@ import java.util.Map;
  */
 public class MapDistinctEdgeConverter extends GraphPromiseMapEdgeConverterBase {
     //region Constructor
-    public MapDistinctEdgeConverter(UniGraph graph, Direction direction, ElementConverter<Map<String, Object>, Element> innerConverter) {
-        super(graph, direction);
+    public MapDistinctEdgeConverter(
+            UniGraph graph,
+            Direction direction,
+            Iterable<HasContainer> edgeAggPromiseHasContainers,
+            GraphElementSchemaProvider schemaProvider,
+            ElementConverter<Map<String, Object>, Element> innerConverter) {
+        super(graph, direction, edgeAggPromiseHasContainers, schemaProvider);
         this.innerConverter = innerConverter;
     }
     //endregion
