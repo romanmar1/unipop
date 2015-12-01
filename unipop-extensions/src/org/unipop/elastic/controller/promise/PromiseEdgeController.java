@@ -21,6 +21,7 @@ import org.unipop.elastic.controller.schema.helpers.elementConverters.CompositeE
 import org.unipop.elastic.controller.schema.helpers.elementConverters.ElementConverter;
 import org.unipop.elastic.controller.schema.helpers.queryAppenders.CompositeQueryAppender;
 import org.unipop.elastic.controller.schema.helpers.queryAppenders.QueryAppender;
+import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphEdgeSchema;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.elastic.helpers.AggregationHelper;
 import org.unipop.elastic.helpers.ElasticMutations;
@@ -304,7 +305,7 @@ public class PromiseEdgeController implements EdgeController {
                 new TraversalPromiseEdgeQueryBuilderFactory(new TraversalConcatIdProvider())
         );
 
-        QueryBuilderFactory<IdPromiseEdgeInput> idPromiseQueryBuilderFactory = new IdPromiseEdgeQueryBuilderFactory();
+        QueryBuilderFactory<IdPromiseSchemaInput<GraphEdgeSchema>> idPromiseQueryBuilderFactory = new IdPromiseEdgeQueryBuilderFactory();
 
         return new CompositeQueryAppender<PromiseBulkInput>(
                     CompositeQueryAppender.Mode.All,

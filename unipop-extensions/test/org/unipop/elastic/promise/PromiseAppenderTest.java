@@ -33,7 +33,7 @@ public class PromiseAppenderTest {
                 new TraversalPromiseEdgeQueryBuilderFactory(new TraversalConcatIdProvider())
         );
 
-        QueryBuilderFactory<IdPromiseEdgeInput> idPromiseQueryBuilderFactory = new IdPromiseEdgeQueryBuilderFactory();
+        QueryBuilderFactory<IdPromiseSchemaInput<GraphEdgeSchema>> idPromiseQueryBuilderFactory = new IdPromiseEdgeQueryBuilderFactory();
 
         this.queryAppender =
                 new CompositeQueryAppender<PromiseBulkInput>(

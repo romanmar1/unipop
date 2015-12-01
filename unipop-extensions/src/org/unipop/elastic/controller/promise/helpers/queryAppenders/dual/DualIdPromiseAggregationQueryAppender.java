@@ -2,11 +2,10 @@ package org.unipop.elastic.controller.promise.helpers.queryAppenders.dual;
 
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.jooq.lambda.Seq;
-import org.unipop.elastic.controller.promise.IdPromise;
 import org.unipop.elastic.controller.promise.TraversalPromise;
 import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.PromiseBulkInput;
-import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.IdPromiseEdgeInput;
+import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.IdPromiseSchemaInput;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.TraversalPromiseEdgeInput;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.QueryBuilderFactory;
 import org.unipop.elastic.controller.schema.helpers.ExecutionHintStrings;
@@ -31,7 +30,7 @@ public class DualIdPromiseAggregationQueryAppender extends DualPromiseQueryAppen
             UniGraph graph,
             GraphElementSchemaProvider schemaProvider,
             Optional<Direction> direction,
-            QueryBuilderFactory<IdPromiseEdgeInput> idPromiseQueryBuilderFactory,
+            QueryBuilderFactory<IdPromiseSchemaInput<GraphEdgeSchema>> idPromiseQueryBuilderFactory,
             QueryBuilderFactory<TraversalPromiseEdgeInput> traversalPromiseQueryBuilderFactory) {
         super(graph, schemaProvider, direction);
         this.idPromiseQueryBuilderFactory = idPromiseQueryBuilderFactory;
@@ -57,7 +56,7 @@ public class DualIdPromiseAggregationQueryAppender extends DualPromiseQueryAppen
                 .map(edgeSchema -> edgeSchema.getSource().get().getIdField())
                 .collect(Collectors.toSet());
 
-        QueryBuilder idPromiseQueryBuilder = this.idPromiseQueryBuilderFactory.getPromiseQueryBuilder(new IdPromiseEdgeInput(input.getBulkIdPromises(), edgeSchemas));
+        QueryBuilder idPromiseQueryBuilder = this.idPromiseQueryBuilderFactory.getPromiseQueryBuilder(new IdPromiseSchemaInput(input.getBulkIdPromises(), edgeSchemas));
 
         // aggregation layer 1
         String firstAggregationLayerName = null;
@@ -120,7 +119,7 @@ public class DualIdPromiseAggregationQueryAppender extends DualPromiseQueryAppen
     //endregion
 
     //region Fields
-    private QueryBuilderFactory<IdPromiseEdgeInput> idPromiseQueryBuilderFactory;
+    private QueryBuilderFactory<IdPromiseSchemaInput<GraphEdgeSchema>> idPromiseQueryBuilderFactory;
     protected QueryBuilderFactory<TraversalPromiseEdgeInput> traversalPromiseQueryBuilderFactory;
     //endregion
 }

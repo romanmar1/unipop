@@ -5,7 +5,7 @@ import org.jooq.lambda.Seq;
 import org.unipop.elastic.controller.promise.TraversalPromise;
 import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.PromiseBulkInput;
-import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.IdPromiseEdgeInput;
+import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.IdPromiseSchemaInput;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.QueryBuilderFactory;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.TraversalPromiseEdgeInput;
 import org.unipop.elastic.controller.schema.helpers.QueryBuilder;
@@ -25,7 +25,7 @@ public class DualPromiseFilterQueryAppender extends DualPromiseQueryAppenderBase
             UniGraph graph,
             GraphElementSchemaProvider schemaProvider,
             Optional<Direction> direction,
-            QueryBuilderFactory<IdPromiseEdgeInput> idPromiseQueryBuilderFactory,
+            QueryBuilderFactory<IdPromiseSchemaInput<GraphEdgeSchema>> idPromiseQueryBuilderFactory,
             QueryBuilderFactory<TraversalPromiseEdgeInput> traversalPromiseQueryBuilderFactory) {
         super(graph, schemaProvider, direction);
         this.idPromiseQueryBuilderFactory = idPromiseQueryBuilderFactory;
@@ -40,7 +40,7 @@ public class DualPromiseFilterQueryAppender extends DualPromiseQueryAppenderBase
 
         Map<String, QueryBuilder> bulkMap = new HashMap<>();
         if (StreamSupport.stream(input.getBulkIdPromises().spliterator(), false).count() > 0) {
-            QueryBuilder idPromiseQueryBuilder = this.idPromiseQueryBuilderFactory.getPromiseQueryBuilder(new IdPromiseEdgeInput(input.getBulkIdPromises(), edgeSchemas));
+            QueryBuilder idPromiseQueryBuilder = this.idPromiseQueryBuilderFactory.getPromiseQueryBuilder(new IdPromiseSchemaInput(input.getBulkIdPromises(), edgeSchemas));
             bulkMap.put("idPromiseFilter", idPromiseQueryBuilder);
         }
 
@@ -74,7 +74,7 @@ public class DualPromiseFilterQueryAppender extends DualPromiseQueryAppenderBase
 
         addBulkAndPredicatesPromisesToQuery(bulkMap, predicatesMap, input.getSearchBuilder().getQueryBuilder());
 
-        return bulkMap.size() > 0 || predicatesMap.size() > 0;
+        return !bulkMap.isEmpty() || !predicatesMap.isEmpty();
     }
     //endregion
 
@@ -132,7 +132,7 @@ public class DualPromiseFilterQueryAppender extends DualPromiseQueryAppenderBase
     //endregion
 
     //region Fields
-    protected QueryBuilderFactory<IdPromiseEdgeInput> idPromiseQueryBuilderFactory;
+    protected QueryBuilderFactory<IdPromiseSchemaInput<GraphEdgeSchema>> idPromiseQueryBuilderFactory;
     protected QueryBuilderFactory<TraversalPromiseEdgeInput> traversalPromiseQueryBuilderFactory;
     //endregion
 }
