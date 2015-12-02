@@ -2,19 +2,14 @@ package org.unipop.elastic.controller.promise.helpers.queryAppenders.dual;
 
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.jooq.lambda.Seq;
-import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
+import org.unipop.elastic.controller.promise.helpers.PromiseStrings;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.PromiseBulkInput;
-import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.QueryBuilderFactory;
-import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.TraversalPromiseEdgeInput;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphEdgeSchema;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.structure.UniGraph;
 
 import java.util.*;
-import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * Created by Roman on 11/27/2015.
@@ -45,12 +40,12 @@ public class DualPromiseDirectionQueryAppender extends DualPromiseQueryAppenderB
             if (Seq.seq(directionValues).count() > 0) {
                 if (directionFields.size() == 1) {
                     input.getSearchBuilder().getQueryBuilder().seekRoot().query().filtered().filter()
-                            .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
+                            .bool(PromiseStrings.PROMISES_TYPES_DIRECTIONS_FILTER).must()
                             .terms(directionEntry.getKey(), directionValues);
                 } else {
                     input.getSearchBuilder().getQueryBuilder().seekRoot().query().filtered().filter()
-                            .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
-                            .bool(PromiseStringConstants.DIRECTIONS_FILTER).should()
+                            .bool(PromiseStrings.PROMISES_TYPES_DIRECTIONS_FILTER).must()
+                            .bool(PromiseStrings.DIRECTIONS_FILTER).should()
                             .terms(directionEntry.getKey(), directionValues);
                 }
             }

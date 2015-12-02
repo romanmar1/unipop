@@ -3,7 +3,7 @@ package org.unipop.elastic.controller.promise.helpers;
 /**
  * Created by Roman on 11/24/2015.
  */
-public class PromiseStringConstants {
+public class PromiseStrings {
     public static final String BULK_TRAVERSAL_PROMISES = "BULK_TRAVERSAL_PROMISES";
     public static final String BULK_ID_PROMISES_FILTERS = "BULK_ID_PROMISES_FILTERS";
     public static final String BULK_ID_PROMISES_FILTER = "BULK_ID_PROMISES_FILTER";
@@ -19,4 +19,10 @@ public class PromiseStringConstants {
 
     public static final String BULK_PROMISES_FILTER = "BULK_PROMISES_FILTER";
     public static final String PREDICATES_PROMISES_FILTER = "PREDICATES_PROMISES_FILTER";
+
+    public class HasKeys {
+        public static final String IN_PROMISE = "in_promise";
+        public static final String OUT_PROMISE = "out_promise";
+        public static final String PREDICATES_PROMISE = "predicates_promise";
+    }
 }

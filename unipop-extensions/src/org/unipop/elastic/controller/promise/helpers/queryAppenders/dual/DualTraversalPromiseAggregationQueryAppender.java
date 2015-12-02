@@ -3,7 +3,7 @@ package org.unipop.elastic.controller.promise.helpers.queryAppenders.dual;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.jooq.lambda.Seq;
 import org.unipop.elastic.controller.promise.TraversalPromise;
-import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
+import org.unipop.elastic.controller.promise.helpers.PromiseStrings;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.PromiseBulkInput;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.QueryBuilderFactory;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.TraversalPromiseEdgeInput;
@@ -13,8 +13,6 @@ import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphEdgeSch
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.structure.UniGraph;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -58,7 +56,7 @@ public class DualTraversalPromiseAggregationQueryAppender extends DualPromiseQue
                         edgeSchemas,
                         TraversalPromiseEdgeInput.EdgeEnd.source));
 
-            input.getSearchBuilder().getAggregationBuilder().seekRoot().filters(PromiseStringConstants.BULK_TRAVERSAL_PROMISES)
+            input.getSearchBuilder().getAggregationBuilder().seekRoot().filters(PromiseStrings.BULK_TRAVERSAL_PROMISES)
                     .filter(traversalPromise.getId().toString(), traversalPromiseQueryBuilder);
         }
 
@@ -75,8 +73,8 @@ public class DualTraversalPromiseAggregationQueryAppender extends DualPromiseQue
                             TraversalPromiseEdgeInput.EdgeEnd.destination));
 
                 input.getSearchBuilder().getAggregationBuilder().seekRoot()
-                        .filters(PromiseStringConstants.BULK_TRAVERSAL_PROMISES)
-                        .filters(PromiseStringConstants.PREDICATES_PROMISES)
+                        .filters(PromiseStrings.BULK_TRAVERSAL_PROMISES)
+                        .filters(PromiseStrings.PREDICATES_PROMISES)
                         .filter(traversalPromisePredicate.getId().toString(), traversalPromiseQueryBuilder);
             }
 
@@ -89,8 +87,8 @@ public class DualTraversalPromiseAggregationQueryAppender extends DualPromiseQue
             // it means we should use terms aggregation for destination ids.
             if (destinationIdFields.size() == 1) {
                 input.getSearchBuilder().getAggregationBuilder().seekRoot()
-                        .filters(PromiseStringConstants.BULK_TRAVERSAL_PROMISES)
-                        .terms(PromiseStringConstants.REDUCED_ID_PROMISES)
+                        .filters(PromiseStrings.BULK_TRAVERSAL_PROMISES)
+                        .terms(PromiseStrings.REDUCED_ID_PROMISES)
                         .field(destinationIdFields.iterator().next())
                         .size(0)
                         .shardSize(0)

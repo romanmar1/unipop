@@ -8,7 +8,7 @@ import org.unipop.elastic.controller.promise.IdPromise;
 import org.unipop.elastic.controller.promise.PromiseEdge;
 import org.unipop.elastic.controller.promise.PromiseVertex;
 import org.unipop.elastic.controller.promise.TraversalPromise;
-import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
+import org.unipop.elastic.controller.promise.helpers.PromiseStrings;
 import org.unipop.elastic.controller.schema.helpers.MapHelper;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.structure.UniGraph;
@@ -37,13 +37,13 @@ public class TraversalToIdMapEdgeConverter extends GraphPromiseMapEdgeConverterB
     //region GraphPromiseMapEdgeConverterBase Implementation
     @Override
     public boolean canConvert(Map<String, Object> map) {
-        Map<String, Object> bulkTraversalPromisesMap = MapHelper.value(map, PromiseStringConstants.BULK_TRAVERSAL_PROMISES);
+        Map<String, Object> bulkTraversalPromisesMap = MapHelper.value(map, PromiseStrings.BULK_TRAVERSAL_PROMISES);
         if (bulkTraversalPromisesMap == null || bulkTraversalPromisesMap.size() == 0) {
             return false;
         }
 
         Map<String, Object> reducedIdPromisesMap = MapHelper.value(bulkTraversalPromisesMap,
-                bulkTraversalPromisesMap.keySet().iterator().next() + "." + PromiseStringConstants.REDUCED_ID_PROMISES);
+                bulkTraversalPromisesMap.keySet().iterator().next() + "." + PromiseStrings.REDUCED_ID_PROMISES);
         if (reducedIdPromisesMap == null || reducedIdPromisesMap.size() == 0) {
             return false;
         }
@@ -55,9 +55,9 @@ public class TraversalToIdMapEdgeConverter extends GraphPromiseMapEdgeConverterB
     public Iterable<Element> convert(Map<String, Object> map) {
         List<Element> edges = new ArrayList<>();
 
-        Map<String, Object> bulkTraversalPromisesMap = MapHelper.value(map, PromiseStringConstants.BULK_TRAVERSAL_PROMISES);
+        Map<String, Object> bulkTraversalPromisesMap = MapHelper.value(map, PromiseStrings.BULK_TRAVERSAL_PROMISES);
         for(Map.Entry<String, Object> layerOneEntry : bulkTraversalPromisesMap.entrySet()) {
-            Map<String, Object> reducedIdPromiseMap = MapHelper.value(bulkTraversalPromisesMap, layerOneEntry.getKey() + "." + PromiseStringConstants.REDUCED_ID_PROMISES);
+            Map<String, Object> reducedIdPromiseMap = MapHelper.value(bulkTraversalPromisesMap, layerOneEntry.getKey() + "." + PromiseStrings.REDUCED_ID_PROMISES);
             if (reducedIdPromiseMap == null) {
                 continue;
             }

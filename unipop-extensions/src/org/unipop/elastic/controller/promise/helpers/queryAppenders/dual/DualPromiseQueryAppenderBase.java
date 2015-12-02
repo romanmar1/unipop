@@ -1,18 +1,12 @@
 package org.unipop.elastic.controller.promise.helpers.queryAppenders.dual;
 
 import org.apache.tinkerpop.gremlin.structure.Direction;
-import org.unipop.elastic.controller.promise.TraversalPromise;
-import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.PromiseBulkInput;
-import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.TraversalPromiseEdgeInput;
-import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.QueryBuilderFactory;
-import org.unipop.elastic.controller.schema.helpers.QueryBuilder;
 import org.unipop.elastic.controller.schema.helpers.queryAppenders.GraphQueryAppenderBase;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphEdgeSchema;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.structure.UniGraph;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

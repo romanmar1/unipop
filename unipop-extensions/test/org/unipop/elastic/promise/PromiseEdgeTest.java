@@ -279,7 +279,7 @@ public class PromiseEdgeTest extends AbstractGremlinTest {
     @Test
     @LoadGraphWith(LoadGraphWith.GraphData.MODERN)
     public void promisePredicatesStrategy() {
-        Traversal traversal = g.V().outE().out().has("bla",2).has("anotherBla", P.within((new ArrayList<Integer>()).add(666)));
+        Traversal traversal = g.V().outE().out().has("promise", P.eq(new TraversalPromise("promise1", __.has("bla",2)))).has("promise", P.within(new TraversalPromise("promise2", __.has("name", "marko"))));
 
         printTraversalForm(traversal);
         int x = 5;

@@ -1,6 +1,6 @@
 package org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory;
 
-import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
+import org.unipop.elastic.controller.promise.helpers.PromiseStrings;
 import org.unipop.elastic.controller.schema.helpers.QueryBuilder;
 
 import java.util.List;
@@ -22,11 +22,11 @@ public class IdPromiseEdgeQueryBuilderFactory implements QueryBuilderFactory<IdP
                 .collect(Collectors.toSet());
 
         if (sourceIdFields.size() == 1) {
-            return new QueryBuilder().query().filtered().filter(PromiseStringConstants.PROMISE_SCHEMAS_ROOT).terms(sourceIdFields.iterator().next(), ids);
+            return new QueryBuilder().query().filtered().filter(PromiseStrings.PROMISE_SCHEMAS_ROOT).terms(sourceIdFields.iterator().next(), ids);
         } else {
             QueryBuilder queryBuilder = new QueryBuilder();
             for(String sourceIdField : sourceIdFields) {
-                queryBuilder.seekRoot().query().filtered().filter(PromiseStringConstants.PROMISE_SCHEMAS_ROOT).bool().should().terms(sourceIdField, ids);
+                queryBuilder.seekRoot().query().filtered().filter(PromiseStrings.PROMISE_SCHEMAS_ROOT).bool().should().terms(sourceIdField, ids);
             }
             return queryBuilder;
         }

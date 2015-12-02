@@ -2,7 +2,7 @@ package org.unipop.elastic.controller.promise.helpers.queryAppenders.dual;
 
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.jooq.lambda.Seq;
-import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
+import org.unipop.elastic.controller.promise.helpers.PromiseStrings;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.PromiseBulkInput;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphEdgeSchema;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
@@ -27,8 +27,8 @@ public class DualPromiseTypesQueryAppender extends DualPromiseQueryAppenderBase{
         Iterable<String> edgeTypes = Seq.seq(edgeSchemas).map(edgeSchema -> edgeSchema.getType()).distinct().toList();
 
         input.getSearchBuilder().getQueryBuilder().seekRoot().query().filtered().filter()
-                .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
-                .terms(PromiseStringConstants.TYPES_FILTER, "_type", edgeTypes);
+                .bool(PromiseStrings.PROMISES_TYPES_DIRECTIONS_FILTER).must()
+                .terms(PromiseStrings.TYPES_FILTER, "_type", edgeTypes);
 
         return Seq.seq(edgeTypes).count() > 0;
     }
