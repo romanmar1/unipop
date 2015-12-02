@@ -329,7 +329,7 @@ public class PromiseEdgeController implements EdgeController {
                 new TraversalPromiseEdgeQueryBuilderFactory(new TraversalConcatIdProvider())
         );
 
-        QueryBuilderFactory<IdPromiseEdgeInput> idPromiseQueryBuilderFactory = new IdPromiseEdgeQueryBuilderFactory();
+        QueryBuilderFactory<IdPromiseSchemaInput<GraphEdgeSchema>> idPromiseQueryBuilderFactory = new IdPromiseEdgeQueryBuilderFactory();
 
         return new CompositeQueryAppender<PromiseBulkInput>(
                     CompositeQueryAppender.Mode.All,

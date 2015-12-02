@@ -1,9 +1,12 @@
 package org.unipop.elastic.controller.promise;
 
 import org.apache.commons.configuration.Configuration;
+import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.elasticsearch.client.Client;
 import org.unipop.elastic.controller.EdgeController;
+import org.unipop.elastic.controller.Predicates;
 import org.unipop.elastic.controller.VertexController;
 import org.unipop.controllerprovider.BasicControllerManager;
 import org.unipop.elastic.controller.promise.helpers.elementConverters.PromiseEdgeConverter;
@@ -27,6 +30,7 @@ import org.unipop.structure.BaseVertex;
 import org.unipop.structure.UniGraph;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -117,6 +121,15 @@ public class PromiseControllerManager extends BasicControllerManager {
     }
 
     @Override
+    public Iterator<BaseEdge> edges(Vertex[] vertices, Direction direction, String[] edgeLabels, Predicates predicates) {
+        if (edgeLabels != null && edgeLabels.length == 1 && edgeLabels[0] == "sameAs") {
+            return this.similarityEdgeController.edges(vertices, direction, edgeLabels, predicates);
+        }
+
+        return super.edges(vertices, direction, edgeLabels, predicates);
+    }
+
+    @Override
     public BaseEdge addEdge(Object edgeId, String label, BaseVertex outV, BaseVertex inV, Map<String, Object> properties) {
         return this.isReadOnly ? null : super.addEdge(edgeId, label, outV, inV, properties);
     }
@@ -130,6 +143,7 @@ public class PromiseControllerManager extends BasicControllerManager {
     //region Fields
     private VertexController vertexController;
     private EdgeController edgeController;
+    private EdgeController similarityEdgeController;
 
     private GraphElementSchemaProvider schemaProvider;
 

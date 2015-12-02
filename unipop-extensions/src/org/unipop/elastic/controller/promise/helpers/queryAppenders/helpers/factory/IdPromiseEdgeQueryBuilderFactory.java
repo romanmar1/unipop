@@ -1,25 +1,22 @@
 package org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory;
 
 import org.unipop.elastic.controller.promise.helpers.PromiseStrings;
+import org.jooq.lambda.Seq;
 import org.unipop.elastic.controller.schema.helpers.QueryBuilder;
-
+import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphEdgeSchema;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Created by Roman on 11/26/2015.
  */
-public class IdPromiseEdgeQueryBuilderFactory implements QueryBuilderFactory<IdPromiseEdgeInput> {
+public class IdPromiseEdgeQueryBuilderFactory implements QueryBuilderFactory<IdPromiseSchemaInput<GraphEdgeSchema>> {
     //region QueryBuilderFactory Implementation
     @Override
-    public QueryBuilder getPromiseQueryBuilder(IdPromiseEdgeInput input) {
-        List<Object> ids = StreamSupport.stream(input.getIdPromises().spliterator(), false).map(idPromise -> idPromise.getId()).collect(Collectors.toList());
+    public QueryBuilder getPromiseQueryBuilder(IdPromiseSchemaInput<GraphEdgeSchema> input) {
+        List<Object> ids = Seq.seq(input.getIdPromises()).map(idPromise -> idPromise.getId()).toList();
 
-        Set<String> sourceIdFields = StreamSupport.stream(input.getEdgeSchemas().spliterator(), false)
-                .map(edgeSchema -> edgeSchema.getSource().get().getIdField())
-                .collect(Collectors.toSet());
+        Set<String> sourceIdFields = Seq.seq(input.getElementSchemas()).map(elementSchema -> elementSchema.getSource().get().getIdField()).toSet();
 
         if (sourceIdFields.size() == 1) {
             return new QueryBuilder().query().filtered().filter(PromiseStrings.PROMISE_SCHEMAS_ROOT).terms(sourceIdFields.iterator().next(), ids);

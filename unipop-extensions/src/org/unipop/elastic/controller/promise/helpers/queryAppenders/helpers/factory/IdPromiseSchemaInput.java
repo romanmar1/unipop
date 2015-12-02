@@ -2,17 +2,18 @@ package org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.fac
 
 import org.unipop.elastic.controller.promise.IdPromise;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphEdgeSchema;
+import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchema;
 
 import java.util.Set;
 
 /**
  * Created by Roman on 11/26/2015.
  */
-public class IdPromiseEdgeInput {
+public class IdPromiseSchemaInput<TSchemaElement extends GraphElementSchema> {
     //region Constructor
-    public IdPromiseEdgeInput(Iterable<IdPromise> idPromises, Iterable<GraphEdgeSchema> edgeSchemas) {
+    public IdPromiseSchemaInput(Iterable<IdPromise> idPromises, Iterable<TSchemaElement> elementSchemas) {
         this.idPromises = idPromises;
-        this.edgeSchemas = edgeSchemas;
+        this.elementSchemas = elementSchemas;
     }
     //endregion
 
@@ -21,13 +22,13 @@ public class IdPromiseEdgeInput {
         return this.idPromises;
     }
 
-    public Iterable<GraphEdgeSchema> getEdgeSchemas() {
-        return edgeSchemas;
+    public Iterable<TSchemaElement> getElementSchemas() {
+        return elementSchemas;
     }
     //endregion
 
     //region Fields
     Iterable<IdPromise> idPromises;
-    Iterable<GraphEdgeSchema> edgeSchemas;
+    Iterable<TSchemaElement> elementSchemas;
     //endregion
 }
