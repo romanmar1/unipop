@@ -13,7 +13,9 @@ import org.unipop.elastic.promise.PromiseVertexTest;
  */
 public class CustomTestSuite extends AbstractGremlinSuite {
     //private static final Class<?>[] allTests = new Class[]{PromiseEdgeTest.class };
-    private static final Class<?>[] allTests = new Class[]{PromiseSimilarityEdgeTest.class };
+    //private static final Class<?>[] allTests = new Class[]{PromiseSimilarityEdgeTest.class };
+
+    private static final Class<?>[] allTests = new Class[]{PromiseEdgeTest.class, PromiseSimilarityEdgeTest.class };
 
     public CustomTestSuite(Class<?> klass, RunnerBuilder builder) throws InitializationError {
         super(klass, builder, allTests, (Class[]) null, false, TraversalEngine.Type.STANDARD);

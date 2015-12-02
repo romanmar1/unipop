@@ -4,12 +4,11 @@ import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.jooq.lambda.Seq;
-import org.unipop.elastic.controller.Predicates;
 import org.unipop.elastic.controller.promise.IdPromise;
 import org.unipop.elastic.controller.promise.PromiseEdge;
 import org.unipop.elastic.controller.promise.PromiseVertex;
 import org.unipop.elastic.controller.promise.TraversalPromise;
-import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
+import org.unipop.elastic.controller.promise.helpers.PromiseStrings;
 import org.unipop.elastic.controller.schema.helpers.MapHelper;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.structure.UniGraph;
@@ -44,7 +43,7 @@ public class IdToTraversalMapEdgeConverter extends GraphPromiseMapEdgeConverterB
         }
 
         Map<String, Object> predicatesPromisesMap = MapHelper.value(bulkIdPromisesMap,
-                bulkIdPromisesMap.keySet().iterator().next() + "." + PromiseStringConstants.PREDICATES_PROMISES);
+                bulkIdPromisesMap.keySet().iterator().next() + "." + PromiseStrings.PREDICATES_PROMISES);
         if (predicatesPromisesMap == null || predicatesPromisesMap.size() == 0) {
             return false;
         }
@@ -58,7 +57,7 @@ public class IdToTraversalMapEdgeConverter extends GraphPromiseMapEdgeConverterB
 
         Map<String, Object> bulkIdPromisesMap = MapHelper.value(map, bulkIdPromisesKey);
         for(Map.Entry<String, Object> layerOneEntry : bulkIdPromisesMap.entrySet()) {
-            Map<String, Object> predicatesPromiseMap = MapHelper.value(bulkIdPromisesMap, layerOneEntry.getKey() + "." + PromiseStringConstants.PREDICATES_PROMISES);
+            Map<String, Object> predicatesPromiseMap = MapHelper.value(bulkIdPromisesMap, layerOneEntry.getKey() + "." + PromiseStrings.PREDICATES_PROMISES);
             if (predicatesPromiseMap == null) {
                 continue;
             }
@@ -100,8 +99,8 @@ public class IdToTraversalMapEdgeConverter extends GraphPromiseMapEdgeConverterB
     private Map<Object, List<TraversalPromise>> predicatesTraversalPromises;
 
     private String bulkIdPromisesKey =
-                PromiseStringConstants.BULK_ID_PROMISES_FILTERS + "." +
-                PromiseStringConstants.BULK_ID_PROMISES_FILTER + "." +
-                PromiseStringConstants.BULK_ID_PROMISES;
+                PromiseStrings.BULK_ID_PROMISES_FILTERS + "." +
+                PromiseStrings.BULK_ID_PROMISES_FILTER + "." +
+                PromiseStrings.BULK_ID_PROMISES;
     //endregion
 }

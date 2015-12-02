@@ -1,7 +1,7 @@
 package org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory;
 
 import org.jooq.lambda.Seq;
-import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
+import org.unipop.elastic.controller.promise.helpers.PromiseStrings;
 import org.unipop.elastic.controller.schema.helpers.QueryBuilder;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphVertexSchema;
 

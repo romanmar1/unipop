@@ -1,9 +1,8 @@
 package org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory;
 
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
-import org.jooq.lambda.Seq;
 import org.unipop.elastic.controller.promise.TraversalPromise;
-import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
+import org.unipop.elastic.controller.promise.helpers.PromiseStrings;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.TraversalEdgeRedundancyTranslator;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.provider.TraversalIdProvider;
 import org.unipop.elastic.controller.schema.helpers.QueryBuilder;
@@ -12,7 +11,6 @@ import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphEdgeSch
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.StreamSupport;
 
 /**
  * Created by Roman on 11/26/2015.
@@ -46,13 +44,13 @@ public class TraversalPromiseEdgeQueryBuilderFactory implements QueryBuilderFact
         }
 
         QueryBuilder traversalPromiseQueryBuilder = edgeRedundantTraversals.size() == 1 ?
-                new QueryBuilder().query().filtered().filter(PromiseStringConstants.PROMISE_SCHEMAS_ROOT) :
-                new QueryBuilder().query().filtered().filter().bool().should(PromiseStringConstants.PROMISE_SCHEMAS_ROOT);
+                new QueryBuilder().query().filtered().filter(PromiseStrings.PROMISE_SCHEMAS_ROOT) :
+                new QueryBuilder().query().filtered().filter().bool().should(PromiseStrings.PROMISE_SCHEMAS_ROOT);
 
         TraversalQueryTranslator traversalQueryTranslator =
                 new TraversalQueryTranslator(input.getSearchBuilder(), traversalPromiseQueryBuilder);
         for(Traversal traversal : edgeRedundantTraversals.values()) {
-            traversalPromiseQueryBuilder.seek(PromiseStringConstants.PROMISE_SCHEMAS_ROOT);
+            traversalPromiseQueryBuilder.seek(PromiseStrings.PROMISE_SCHEMAS_ROOT);
             traversalQueryTranslator.visit(traversal);
         }
 

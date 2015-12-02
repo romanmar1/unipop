@@ -10,6 +10,7 @@ import org.elasticsearch.client.Client;
 import org.jooq.lambda.Seq;
 import org.unipop.elastic.controller.EdgeController;
 import org.unipop.elastic.controller.Predicates;
+import org.unipop.elastic.controller.promise.helpers.PromiseStrings;
 import org.unipop.elastic.controller.promise.helpers.elementConverters.map.*;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.*;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.dual.*;
@@ -67,18 +68,18 @@ public class PromiseEdgeController implements EdgeController {
         }
 
         List<HasContainer> inHasContainers = predicates.hasContainers.stream()
-                .filter(hasContainer -> hasContainer.getKey().toLowerCase().equals(IN_PROMISE)).collect(Collectors.toList());
+                .filter(hasContainer -> hasContainer.getKey().toLowerCase().equals(PromiseStrings.HasKeys.IN_PROMISE)).collect(Collectors.toList());
         List<HasContainer> outHasContainers = predicates.hasContainers.stream()
-                .filter(hasContainer -> hasContainer.getKey().toLowerCase().equals(OUT_PROMISE)).collect(Collectors.toList());
+                .filter(hasContainer -> hasContainer.getKey().toLowerCase().equals(PromiseStrings.HasKeys.OUT_PROMISE)).collect(Collectors.toList());
         List<HasContainer> edgeHasContainers = predicates.hasContainers.stream()
                 .filter(hasContainer -> !inHasContainers.contains(hasContainer) && !outHasContainers.contains(hasContainer)).collect(Collectors.toList());
 
         if (inHasContainers.size() > 1) {
-            throw new UnsupportedOperationException("Single \"" + IN_PROMISE + "\" allowed");
+            throw new UnsupportedOperationException("Single \"" + PromiseStrings.HasKeys.IN_PROMISE + "\" allowed");
         }
 
         if (outHasContainers.size() > 1) {
-            throw new UnsupportedOperationException("Single \"" + OUT_PROMISE + "\" allowed");
+            throw new UnsupportedOperationException("Single \"" + PromiseStrings.HasKeys.OUT_PROMISE + "\" allowed");
         }
 
         SearchBuilder searchBuilder = buildEdgePromiseQuery(inHasContainers, outHasContainers, edgeHasContainers);
@@ -91,9 +92,9 @@ public class PromiseEdgeController implements EdgeController {
         this.elasticMutations.refreshIfDirty();
 
         List<HasContainer> predicatesPromiseHasContainers = predicates.hasContainers.stream()
-                .filter(hasContainer -> hasContainer.getKey().toLowerCase().equals(PREDICATES_PROMISE)).collect(Collectors.toList());
+                .filter(hasContainer -> hasContainer.getKey().toLowerCase().equals(PromiseStrings.HasKeys.PREDICATES_PROMISE)).collect(Collectors.toList());
         if (predicatesPromiseHasContainers.size() > 1) {
-            throw new UnsupportedOperationException("Single \"" + PREDICATES_PROMISE + "\" allowed");
+            throw new UnsupportedOperationException("Single \"" + PromiseStrings.HasKeys.PREDICATES_PROMISE + "\" allowed");
         }
 
         Optional<GraphEdgeSchema> promiseEdgeSchema = this.schemaProvider.getEdgeSchema("promise", Optional.of("promise"), Optional.of("promise"));
@@ -239,8 +240,12 @@ public class PromiseEdgeController implements EdgeController {
     }
 
     private Iterable<Promise> extractPromises(Iterable<HasContainer> hasContainers) {
+        List<String> relevantPromiseKeys = Arrays.asList(
+                PromiseStrings.HasKeys.IN_PROMISE,
+                PromiseStrings.HasKeys.OUT_PROMISE,
+                PromiseStrings.HasKeys.PREDICATES_PROMISE);
         return StreamSupport.stream(hasContainers.spliterator(), false)
-                .filter(hasContainer -> Arrays.asList(IN_PROMISE, OUT_PROMISE, PREDICATES_PROMISE).contains(hasContainer.getKey().toLowerCase()))
+                .filter(hasContainer -> relevantPromiseKeys.contains(hasContainer.getKey().toLowerCase()))
                 .flatMap(hasContainer -> {
                     if (Promise.class.isAssignableFrom(hasContainer.getValue().getClass())) {
                         return Arrays.asList((Promise)hasContainer.getValue()).stream();
@@ -369,9 +374,5 @@ public class PromiseEdgeController implements EdgeController {
     private GraphElementSchemaProvider schemaProvider;
     private Client client;
     private ElasticMutations elasticMutations;
-
-    private final String IN_PROMISE = "in_promise";
-    private final String OUT_PROMISE = "out_promise";
-    private final String PREDICATES_PROMISE = "predicates_promise";
     //endregion
 }

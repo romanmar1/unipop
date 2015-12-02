@@ -3,21 +3,17 @@ package org.unipop.elastic.controller.promise.helpers.elementConverters.map;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Element;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.unipop.elastic.controller.promise.IdPromise;
 import org.unipop.elastic.controller.promise.PromiseEdge;
 import org.unipop.elastic.controller.promise.PromiseVertex;
-import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
-import org.unipop.elastic.controller.promise.schemaProviders.GraphPromiseEdgeSchema;
+import org.unipop.elastic.controller.promise.helpers.PromiseStrings;
 import org.unipop.elastic.controller.schema.helpers.MapHelper;
-import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphEdgeSchema;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.structure.UniGraph;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Created by Roman on 11/27/2015.
@@ -42,7 +38,7 @@ public class IdToIdMapEdgeConverter extends GraphPromiseMapEdgeConverterBase {
         }
 
         Map<String, Object> reducedIdPromisesMap = MapHelper.value(bulkIdPromisesMap,
-                bulkIdPromisesMap.keySet().iterator().next() + "." + PromiseStringConstants.REDUCED_ID_PROMISES);
+                bulkIdPromisesMap.keySet().iterator().next() + "." + PromiseStrings.REDUCED_ID_PROMISES);
         if (reducedIdPromisesMap == null || reducedIdPromisesMap.size() == 0) {
             return false;
         }
@@ -55,7 +51,7 @@ public class IdToIdMapEdgeConverter extends GraphPromiseMapEdgeConverterBase {
         List<Element> edges = new ArrayList<>();
         Map<String, Object> bulkIdPromisesMap = MapHelper.value(map, bulkIdPromisesKey);
         for(Map.Entry<String, Object> layerOneEntry : bulkIdPromisesMap.entrySet()) {
-            Map<String, Object> reducedIdPromiseMap = MapHelper.value(bulkIdPromisesMap, layerOneEntry.getKey() + "." + PromiseStringConstants.REDUCED_ID_PROMISES);
+            Map<String, Object> reducedIdPromiseMap = MapHelper.value(bulkIdPromisesMap, layerOneEntry.getKey() + "." + PromiseStrings.REDUCED_ID_PROMISES);
             if (reducedIdPromiseMap == null) {
                 continue;
             }
@@ -87,8 +83,8 @@ public class IdToIdMapEdgeConverter extends GraphPromiseMapEdgeConverterBase {
 
     //region Fields
     private String bulkIdPromisesKey =
-            PromiseStringConstants.BULK_ID_PROMISES_FILTERS + "." +
-            PromiseStringConstants.BULK_ID_PROMISES_FILTER + "." +
-            PromiseStringConstants.BULK_ID_PROMISES;
+            PromiseStrings.BULK_ID_PROMISES_FILTERS + "." +
+            PromiseStrings.BULK_ID_PROMISES_FILTER + "." +
+            PromiseStrings.BULK_ID_PROMISES;
     //endregion
 }

@@ -3,12 +3,11 @@ package org.unipop.elastic.controller.promise.helpers.queryAppenders.similarity;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.jooq.lambda.Seq;
 import org.unipop.elastic.controller.promise.TraversalPromise;
-import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
+import org.unipop.elastic.controller.promise.helpers.PromiseStrings;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.PromiseBulkInput;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.PromiseSimilarityBulkInput;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.IdPromiseSchemaInput;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.QueryBuilderFactory;
-import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.TraversalPromiseEdgeInput;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.TraversalPromiseVertexInput;
 import org.unipop.elastic.controller.schema.helpers.QueryBuilder;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
@@ -78,12 +77,12 @@ public class PromiseFilterSimilarityQueryAppender extends PromiseSimilarityQuery
         for (Map.Entry<String, QueryBuilder> bulkEntry : bulkMap.entrySet()) {
             if (bulkMap.size() == 1) {
                 queryBuilder.seekRoot().query().filtered().filter()
-                        .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
+                        .bool(PromiseStrings.PROMISES_TYPES_DIRECTIONS_FILTER).must()
                         .queryBuilderFilter(bulkEntry.getKey(), bulkEntry.getValue());
             } else {
                 queryBuilder.seekRoot().query().filtered().filter()
-                        .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
-                        .bool(PromiseStringConstants.PROMISES_FILTER).should()
+                        .bool(PromiseStrings.PROMISES_TYPES_DIRECTIONS_FILTER).must()
+                        .bool(PromiseStrings.PROMISES_FILTER).should()
                         .queryBuilderFilter(bulkEntry.getKey(), bulkEntry.getValue());
             }
         }

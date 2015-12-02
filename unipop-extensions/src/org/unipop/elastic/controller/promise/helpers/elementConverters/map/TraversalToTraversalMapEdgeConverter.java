@@ -4,11 +4,10 @@ import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.jooq.lambda.Seq;
-import org.unipop.elastic.controller.promise.IdPromise;
 import org.unipop.elastic.controller.promise.PromiseEdge;
 import org.unipop.elastic.controller.promise.PromiseVertex;
 import org.unipop.elastic.controller.promise.TraversalPromise;
-import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
+import org.unipop.elastic.controller.promise.helpers.PromiseStrings;
 import org.unipop.elastic.controller.schema.helpers.MapHelper;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.structure.UniGraph;
@@ -39,13 +38,13 @@ public class TraversalToTraversalMapEdgeConverter extends GraphPromiseMapEdgeCon
     //region GraphPromiseMapEdgeConverterBase Implementation
     @Override
     public boolean canConvert(Map<String, Object> map) {
-        Map<String, Object> bulkTraversalPromisesMap = MapHelper.value(map, PromiseStringConstants.BULK_TRAVERSAL_PROMISES);
+        Map<String, Object> bulkTraversalPromisesMap = MapHelper.value(map, PromiseStrings.BULK_TRAVERSAL_PROMISES);
         if (bulkTraversalPromisesMap == null || bulkTraversalPromisesMap.size() == 0) {
             return false;
         }
 
         Map<String, Object> predicatesPromisesMap = MapHelper.value(bulkTraversalPromisesMap,
-                bulkTraversalPromisesMap.keySet().iterator().next() + "." + PromiseStringConstants.PREDICATES_PROMISES);
+                bulkTraversalPromisesMap.keySet().iterator().next() + "." + PromiseStrings.PREDICATES_PROMISES);
         if (predicatesPromisesMap == null || predicatesPromisesMap.size() == 0) {
             return false;
         }
@@ -57,9 +56,9 @@ public class TraversalToTraversalMapEdgeConverter extends GraphPromiseMapEdgeCon
     public Iterable<Element> convert(Map<String, Object> map) {
         List<Element> edges = new ArrayList<>();
 
-        Map<String, Object> bulkTraversalPromisesMap = MapHelper.value(map, PromiseStringConstants.BULK_TRAVERSAL_PROMISES);
+        Map<String, Object> bulkTraversalPromisesMap = MapHelper.value(map, PromiseStrings.BULK_TRAVERSAL_PROMISES);
         for(Map.Entry<String, Object> layerOneEntry : bulkTraversalPromisesMap.entrySet()) {
-            Map<String, Object> predicatesPromiseMap = MapHelper.value(bulkTraversalPromisesMap, layerOneEntry.getKey() + "." + PromiseStringConstants.PREDICATES_PROMISES);
+            Map<String, Object> predicatesPromiseMap = MapHelper.value(bulkTraversalPromisesMap, layerOneEntry.getKey() + "." + PromiseStrings.PREDICATES_PROMISES);
             if (predicatesPromiseMap == null) {
                 continue;
             }

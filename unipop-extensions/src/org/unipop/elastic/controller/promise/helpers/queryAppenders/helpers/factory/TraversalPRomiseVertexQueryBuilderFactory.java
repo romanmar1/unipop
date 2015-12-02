@@ -2,7 +2,7 @@ package org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.fac
 
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.unipop.elastic.controller.promise.TraversalPromise;
-import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
+import org.unipop.elastic.controller.promise.helpers.PromiseStrings;
 import org.unipop.elastic.controller.schema.helpers.QueryBuilder;
 import org.unipop.elastic.controller.schema.helpers.TraversalQueryTranslator;
 

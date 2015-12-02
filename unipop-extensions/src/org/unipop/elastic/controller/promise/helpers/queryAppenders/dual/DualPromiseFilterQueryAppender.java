@@ -3,7 +3,7 @@ package org.unipop.elastic.controller.promise.helpers.queryAppenders.dual;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.jooq.lambda.Seq;
 import org.unipop.elastic.controller.promise.TraversalPromise;
-import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
+import org.unipop.elastic.controller.promise.helpers.PromiseStrings;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.PromiseBulkInput;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.IdPromiseSchemaInput;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.QueryBuilderFactory;
@@ -87,14 +87,14 @@ public class DualPromiseFilterQueryAppender extends DualPromiseQueryAppenderBase
             for(Map.Entry<String, QueryBuilder> bulkEntry : bulkMap.entrySet()) {
                 if (bulkMap.size() == 1) {
                     queryBuilder.seekRoot().query().filtered().filter()
-                            .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
-                            .bool(PromiseStringConstants.PROMISES_FILTER).must()
+                            .bool(PromiseStrings.PROMISES_TYPES_DIRECTIONS_FILTER).must()
+                            .bool(PromiseStrings.PROMISES_FILTER).must()
                             .queryBuilderFilter(bulkEntry.getKey(), bulkEntry.getValue());
                 } else {
                     queryBuilder.seekRoot().query().filtered().filter()
-                            .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
-                            .bool(PromiseStringConstants.PROMISES_FILTER).must()
-                            .bool(PromiseStringConstants.BULK_PROMISES_FILTER).should()
+                            .bool(PromiseStrings.PROMISES_TYPES_DIRECTIONS_FILTER).must()
+                            .bool(PromiseStrings.PROMISES_FILTER).must()
+                            .bool(PromiseStrings.BULK_PROMISES_FILTER).should()
                             .queryBuilderFilter(bulkEntry.getKey(), bulkEntry.getValue());
                 }
             }
@@ -102,14 +102,14 @@ public class DualPromiseFilterQueryAppender extends DualPromiseQueryAppenderBase
             for(Map.Entry<String, QueryBuilder> predicatesEntry : predicatesMap.entrySet()) {
                 if (predicatesMap.size() == 1) {
                     queryBuilder.seekRoot().query().filtered().filter()
-                            .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
-                            .bool(PromiseStringConstants.PROMISES_FILTER).must()
+                            .bool(PromiseStrings.PROMISES_TYPES_DIRECTIONS_FILTER).must()
+                            .bool(PromiseStrings.PROMISES_FILTER).must()
                             .queryBuilderFilter(predicatesEntry.getKey(), predicatesEntry.getValue());
                 } else {
                     queryBuilder.seekRoot().query().filtered().filter()
-                            .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
-                            .bool(PromiseStringConstants.PROMISES_FILTER).must()
-                            .bool(PromiseStringConstants.PREDICATES_PROMISES_FILTER).should()
+                            .bool(PromiseStrings.PROMISES_TYPES_DIRECTIONS_FILTER).must()
+                            .bool(PromiseStrings.PROMISES_FILTER).must()
+                            .bool(PromiseStrings.PREDICATES_PROMISES_FILTER).should()
                             .queryBuilderFilter(predicatesEntry.getKey(), predicatesEntry.getValue());
                 }
             }
@@ -118,12 +118,12 @@ public class DualPromiseFilterQueryAppender extends DualPromiseQueryAppenderBase
             for(Map.Entry<String, QueryBuilder> bulkEntry : bulkMap.entrySet()) {
                 if (bulkMap.size() == 1) {
                     queryBuilder.seekRoot().query().filtered().filter()
-                            .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
+                            .bool(PromiseStrings.PROMISES_TYPES_DIRECTIONS_FILTER).must()
                             .queryBuilderFilter(bulkEntry.getKey(), bulkEntry.getValue());
                 } else {
                     queryBuilder.seekRoot().query().filtered().filter()
-                            .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()
-                            .bool(PromiseStringConstants.PROMISES_FILTER).should()
+                            .bool(PromiseStrings.PROMISES_TYPES_DIRECTIONS_FILTER).must()
+                            .bool(PromiseStrings.PROMISES_FILTER).should()
                             .queryBuilderFilter(bulkEntry.getKey(), bulkEntry.getValue());
                 }
             }

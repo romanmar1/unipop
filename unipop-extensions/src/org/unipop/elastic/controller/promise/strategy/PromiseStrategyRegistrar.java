@@ -30,6 +30,7 @@ public class PromiseStrategyRegistrar extends BasicStrategyRegistrar {
                     new UniGraphStartStepStrategy(),
                     new UniGraphVertexStepStrategy(),
                     new UniGraphPredicatesStrategy(),
+                    new PromiseRedundantEdgePropertyStrategy(),
                     new PromisePredicatesStrategy(schemaProvider)
             );
 

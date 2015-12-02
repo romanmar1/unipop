@@ -276,12 +276,12 @@ public class PromiseEdgeTest extends AbstractGremlinTest {
         Assert.assertEquals((Long)2L, (Long)counts.get(2));
     }
 
-    @Test
-    @LoadGraphWith(LoadGraphWith.GraphData.MODERN)
-    public void promisePredicatesStrategy() {
-        Traversal traversal = g.V().out().out().has("bla",2).has("anotherBla", P.within(Arrays.asList(666)));
-
-        printTraversalForm(traversal);
-        int x = 5;
-    }
+//    @Test
+//    @LoadGraphWith(LoadGraphWith.GraphData.MODERN)
+//    public void promisePredicatesStrategy() {
+//        Traversal traversal = g.V().outE().out().has("promise", P.eq(new TraversalPromise("promise1", __.has("bla",2)))).has("promise", P.within(new TraversalPromise("promise2", __.has("name", "marko"))));
+//
+//        printTraversalForm(traversal);
+//        int x = 5;
+//    }
 }
