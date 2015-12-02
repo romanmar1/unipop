@@ -12,6 +12,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.unipop.elastic.controller.promise.*;
+import org.unipop.elastic.controller.promise.helpers.PromiseStrings;
+import org.unipop.process.UniGraphVertexStep;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -276,12 +278,31 @@ public class PromiseEdgeTest extends AbstractGremlinTest {
         Assert.assertEquals((Long)2L, (Long)counts.get(2));
     }
 
-//    @Test
-//    @LoadGraphWith(LoadGraphWith.GraphData.MODERN)
-//    public void promisePredicatesStrategy() {
-//        Traversal traversal = g.V().outE().out().has("promise", P.eq(new TraversalPromise("promise1", __.has("bla",2)))).has("promise", P.within(new TraversalPromise("promise2", __.has("name", "marko"))));
-//
-//        printTraversalForm(traversal);
-//        int x = 5;
-//    }
+    @Test
+    @LoadGraphWith(LoadGraphWith.GraphData.MODERN)
+    public void promise_redundant_edge_property_strategy__edge_vertex_step_case() {
+        Traversal traversal = g.V().outE().inV().has("promise", P.within(new TraversalPromise("promise2", __.has("name", "marko"))));
+
+        printTraversalForm(traversal);
+
+        Assert.assertEquals(2, traversal.asAdmin().getSteps().size());
+        Assert.assertEquals(UniGraphVertexStep.class, traversal.asAdmin().getSteps().get(1).getClass());
+        Assert.assertEquals(1, ((UniGraphVertexStep)(traversal.asAdmin().getSteps().get(1))).getPredicates().hasContainers.size());
+        Assert.assertEquals(PromiseStrings.HasKeys.PREDICATES_PROMISE, ((UniGraphVertexStep)(traversal.asAdmin().getSteps().get(1))).getPredicates().hasContainers.get(0).getKey());
+        int x = 5;
+    }
+
+    @Test
+    @LoadGraphWith(LoadGraphWith.GraphData.MODERN)
+    public void promise_redundant_edge_property_strategy__vertex_step_case() {
+        Traversal traversal = g.V().out().has("promise", P.within(new TraversalPromise("promise2", __.has("name", "marko"))));
+
+        printTraversalForm(traversal);
+
+        Assert.assertEquals(2, traversal.asAdmin().getSteps().size());
+        Assert.assertEquals(UniGraphVertexStep.class, traversal.asAdmin().getSteps().get(1).getClass());
+        Assert.assertEquals(1, ((UniGraphVertexStep)(traversal.asAdmin().getSteps().get(1))).getPredicates().hasContainers.size());
+        Assert.assertEquals(PromiseStrings.HasKeys.PREDICATES_PROMISE, ((UniGraphVertexStep)(traversal.asAdmin().getSteps().get(1))).getPredicates().hasContainers.get(0).getKey());
+        int x = 5;
+    }
 }

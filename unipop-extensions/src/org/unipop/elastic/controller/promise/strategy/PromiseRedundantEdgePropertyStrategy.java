@@ -64,21 +64,10 @@ public class PromiseRedundantEdgePropertyStrategy extends AbstractTraversalStrat
                 Step nextStep = edgeVertexStep.getNextStep();
                 while (HasStep.class.isAssignableFrom(nextStep.getClass())) {
                     HasStep hasStep = (HasStep)nextStep;
-                    List<HasContainer> predicatesPromises = new ArrayList<>();
-                    for (HasContainer hasContainer : (List<HasContainer>)hasStep.getHasContainers()) {
-                        if (hasContainer.getKey().toLowerCase().equals("promise")) {
-                            hasContainer.setKey(PromiseStrings.HasKeys.PREDICATES_PROMISE);
-                            predicatesPromises.add(hasContainer);
-                            hasStep.getHasContainers().remove(hasContainer);
-                        }
-                    }
+                    List<HasContainer> predicatesPromises = takePromiseHasContainersAsPredicatesPromise(hasStep, traversal);
                     // Add all containers with "promise" key to previous UniGraphVertexStep
                     ((UniGraphVertexStep)(edgeVertexStep.getPreviousStep())).getPredicates().hasContainers.addAll(predicatesPromises);
                     nextStep = nextStep.getNextStep();
-
-                    if (hasStep.getHasContainers().isEmpty()) {
-                        hasStep.getTraversal().removeStep(hasStep);
-                    }
                 }
             }
         }
@@ -90,14 +79,47 @@ public class PromiseRedundantEdgePropertyStrategy extends AbstractTraversalStrat
         for (UniGraphVertexStep vertexStep : vertexSteps) {
             // for each vertexStep which its return type is vertex and is UniGraphVertexStep
             if (Vertex.class.isAssignableFrom(vertexStep.getReturnClass())) {
+                // Handle vertex predicates object
                 for (HasContainer hasContainer : vertexStep.getPredicates().hasContainers) {
                     if (hasContainer.getKey().toLowerCase().equals("promise")) {
                         hasContainer.setKey(PromiseStrings.HasKeys.PREDICATES_PROMISE);
                     }
                 }
 
+                // Handle has steps following the vertex step (has containers after VertexStep may
+                // relate to EdgeVertexStep that was swollowed into the VertexStep [outE().inV() ==> outV()]
+                Step nextStep = vertexStep.getNextStep();
+                while (HasStep.class.isAssignableFrom(nextStep.getClass())) {
+                    List<HasContainer> predicatesPromises =
+                            takePromiseHasContainersAsPredicatesPromise((HasStep) nextStep, traversal);
+                    // Add all containers with "promise" key to VertexStep
+                    vertexStep.getPredicates().hasContainers.addAll(predicatesPromises);
+                    nextStep = nextStep.getNextStep();
+
+                }
             }
         }
+    }
+
+    private List<HasContainer> takePromiseHasContainersAsPredicatesPromise(HasStep nextStep, Traversal.Admin<?, ?> traversal) {
+        HasStep hasStep = nextStep;
+        List<HasContainer> predicatesPromises = new ArrayList<>();
+        List<HasContainer> otherHasContainers = new ArrayList<>();
+        for (HasContainer hasContainer : (List<HasContainer>)hasStep.getHasContainers()) {
+            if (hasContainer.getKey().toLowerCase().equals("promise")) {
+                hasContainer.setKey(PromiseStrings.HasKeys.PREDICATES_PROMISE);
+                predicatesPromises.add(hasContainer);
+            } else {
+                otherHasContainers.add(hasContainer);
+            }
+        }
+        if (otherHasContainers.isEmpty()) {
+            hasStep.getTraversal().removeStep(hasStep);
+        } else {
+            HasStep newHasStep = new HasStep(traversal, otherHasContainers.stream().toArray(HasContainer[]::new));
+            TraversalHelper.replaceStep(hasStep, newHasStep, traversal);
+        }
+        return predicatesPromises;
     }
     //endregion
 }
