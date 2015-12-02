@@ -16,7 +16,7 @@ import java.util.Optional;
 /**
  * Created by Roman on 11/28/2015.
  */
-public class TraversalConcatIdProvider implements TraversalIdProvider<String> {
+public class TraversalConcatKeyIdProvider implements TraversalIdProvider<String> {
 
     //region TraversalIdProvider
     @Override

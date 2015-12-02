@@ -4,21 +4,32 @@ import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.shaded.kryo.serializers.FieldSerializer;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.search.SearchHit;
 import org.jooq.lambda.Seq;
 import org.unipop.elastic.controller.EdgeController;
 import org.unipop.elastic.controller.Predicates;
+import org.unipop.elastic.controller.promise.helpers.elementConverters.similarity.VertexToTraversalSimilarityEdgeConverter;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.PromiseBulkInput;
+import org.unipop.elastic.controller.promise.helpers.queryAppenders.PromiseSimilarityBulkInput;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.dual.*;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.*;
+import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.provider.TraversalExpressionIdProvider;
+import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.provider.TraversalHashIdProvider;
+import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.provider.TraversalIdProvider;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.similarity.PromiseFilterSimilarityQueryAppender;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.similarity.PromiseTypesSimilarityQueryAppender;
+import org.unipop.elastic.controller.promise.schemaProviders.GraphPromiseVertexSchema;
 import org.unipop.elastic.controller.schema.helpers.ElasticGraphConfiguration;
 import org.unipop.elastic.controller.schema.helpers.SearchBuilder;
+import org.unipop.elastic.controller.schema.helpers.SearchBuilderHelper;
 import org.unipop.elastic.controller.schema.helpers.SearchHitScrollIterable;
 import org.unipop.elastic.controller.schema.helpers.elementConverters.ElementConverter;
+import org.unipop.elastic.controller.schema.helpers.elementConverters.utils.ElementFactory;
+import org.unipop.elastic.controller.schema.helpers.elementConverters.utils.RecycledElementFactory;
+import org.unipop.elastic.controller.schema.helpers.elementConverters.utils.SearchHitElement;
 import org.unipop.elastic.controller.schema.helpers.queryAppenders.CompositeQueryAppender;
 import org.unipop.elastic.controller.schema.helpers.queryAppenders.QueryAppender;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
@@ -42,14 +53,20 @@ public class PromiseSimilarityEdgeController implements EdgeController {
             GraphElementSchemaProvider schemaProvider,
             Client client,
             ElasticMutations elasticMutations,
-            ElasticGraphConfiguration elasticGraphConfiguration,
-            ElementConverter<Element, Element> elementConverter) {
+            ElasticGraphConfiguration elasticGraphConfiguration) {
         this.graph = graph;
-        this.elementConverter = elementConverter;
         this.schemaProvider = schemaProvider;
         this.client = client;
         this.elasticMutations = elasticMutations;
         this.configuration = elasticGraphConfiguration;
+
+        this.searchHitElementFactory = new RecycledElementFactory<>(Arrays.asList(
+                new SearchHitElement(null, graph),
+                new SearchHitElement(null, graph),
+                new SearchHitElement(null, graph),
+                new SearchHitElement(null, graph),
+                new SearchHitElement(null, graph)
+        ));
     }
     //endregion
 
@@ -73,10 +90,13 @@ public class PromiseSimilarityEdgeController implements EdgeController {
             return Collections.emptyIterator();
         }
 
-        getSearchHits(searchBuilder);
+        ElementConverter<Element, Element> idPromiseElementConverter = getIdPromiseElementConverter(direction);
+        Iterable<BaseEdge> similarityEdges = Seq.seq(getSearchHits(searchBuilder))
+                .map(searchHit -> this.searchHitElementFactory.getElement(searchHit))
+                .flatMap(element -> Seq.seq(idPromiseElementConverter.convert(element)))
+                .cast(BaseEdge.class);
 
-        return null;
-
+        return similarityEdges.iterator();
     }
 
     @Override
@@ -123,13 +143,20 @@ public class PromiseSimilarityEdgeController implements EdgeController {
     }
 
     private SearchBuilder buildIdPromiseSimilarityEdgeQuery(Iterable<IdPromise> idPromises, Direction direction) {
+        Optional<GraphPromiseVertexSchema> graphPromiseVertexSchema = getGraphPromiseVertexSchema();
+        if (!graphPromiseVertexSchema.isPresent()) {
+            return null;
+        }
+
         SearchBuilder searchBuilder = new SearchBuilder();
+        translateLabelsPredicate(Collections.emptyList(), searchBuilder, Vertex.class);
+        searchBuilder.getIncludeSourceFields().addAll(Seq.seq(graphPromiseVertexSchema.get().getSimilarity().getSimilarityProperties()).toList());
+        searchBuilder.setLimit(Seq.seq(idPromises).count());
+
         searchBuilder.getQueryBuilder().seekRoot().query().filtered().query().matchAll();
 
-        PromiseBulkInput promiseBulkInput = new PromiseBulkInput(
+        PromiseSimilarityBulkInput promiseBulkInput = new PromiseSimilarityBulkInput(
                 idPromises,
-                Collections.emptyList(),
-                Collections.emptyList(),
                 Collections.emptyList(),
                 Seq.seq(this.schemaProvider.getVertexTypes()).toList(),
                 searchBuilder);
@@ -141,15 +168,33 @@ public class PromiseSimilarityEdgeController implements EdgeController {
         return searchBuilder;
     }
 
-    private QueryAppender<PromiseBulkInput> getIdPromiseQueryAppender(Direction direction) {
+    private QueryAppender<PromiseSimilarityBulkInput> getIdPromiseQueryAppender(Direction direction) {
         QueryBuilderFactory<IdPromiseSchemaInput<GraphVertexSchema>> idPromiseQueryBuilderFactory = new IdPromiseVertexQueryBuilderFactory();
         QueryBuilderFactory<TraversalPromiseVertexInput> traversalPromiseQueryBuilderFactory = new TraversalPromiseVertexQueryBuilderFactory();
 
-        return new CompositeQueryAppender<PromiseBulkInput>(
+        return new CompositeQueryAppender<PromiseSimilarityBulkInput>(
                 CompositeQueryAppender.Mode.All,
                 new PromiseTypesSimilarityQueryAppender(this.graph, this.schemaProvider, Optional.of(direction)),
                 new PromiseFilterSimilarityQueryAppender(this.graph, this.schemaProvider, Optional.of(direction), idPromiseQueryBuilderFactory, traversalPromiseQueryBuilderFactory));
 
+    }
+
+    private ElementConverter<Element, Element> getIdPromiseElementConverter(Direction direction) {
+        try {
+            TraversalIdProvider<String> traversalIdProvider = new TraversalHashIdProvider(new TraversalExpressionIdProvider(), "MD5");
+            return new VertexToTraversalSimilarityEdgeConverter(this.graph, direction, traversalIdProvider);
+        } catch(Exception ex) {
+            return null;
+        }
+    }
+
+    private Optional<GraphPromiseVertexSchema> getGraphPromiseVertexSchema() {
+        Optional<GraphVertexSchema> vertexSchema = this.schemaProvider.getVertexSchema("promise");
+        if (vertexSchema.isPresent() && GraphPromiseVertexSchema.class.isAssignableFrom(vertexSchema.get().getClass())) {
+            return Optional.of((GraphPromiseVertexSchema)vertexSchema.get());
+        }
+
+        return Optional.empty();
     }
 
     protected Iterable<SearchHit> getSearchHits(SearchBuilder searchBuilder) {
@@ -166,14 +211,25 @@ public class PromiseSimilarityEdgeController implements EdgeController {
 
         return scrollIterable;
     }
+
+    @SuppressWarnings("Duplicates")
+    private void translateLabelsPredicate(Iterable<String> labels, SearchBuilder searchBuilder, Class elementType) {
+        if (labels != null && Seq.seq(labels).isNotEmpty()) {
+            SearchBuilderHelper.applyIndices(searchBuilder, schemaProvider, labels, elementType);
+            SearchBuilderHelper.applyTypes(searchBuilder, schemaProvider, labels, elementType);
+        } else {
+            SearchBuilderHelper.applyIndices(searchBuilder, schemaProvider, elementType);
+            SearchBuilderHelper.applyTypes(searchBuilder, schemaProvider, elementType);
+        }
+    }
     //endregion
 
     //region Fields
     private UniGraph graph;
     private ElasticGraphConfiguration configuration;
-    private ElementConverter<Element, Element> elementConverter;
     private GraphElementSchemaProvider schemaProvider;
     private Client client;
     private ElasticMutations elasticMutations;
+    protected ElementFactory<SearchHit, SearchHitElement> searchHitElementFactory;
     //endregion
 }

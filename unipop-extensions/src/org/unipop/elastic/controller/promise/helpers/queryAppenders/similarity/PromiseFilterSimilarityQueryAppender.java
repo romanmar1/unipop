@@ -5,6 +5,7 @@ import org.jooq.lambda.Seq;
 import org.unipop.elastic.controller.promise.TraversalPromise;
 import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.PromiseBulkInput;
+import org.unipop.elastic.controller.promise.helpers.queryAppenders.PromiseSimilarityBulkInput;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.IdPromiseSchemaInput;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.QueryBuilderFactory;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.TraversalPromiseEdgeInput;
@@ -37,13 +38,13 @@ public class PromiseFilterSimilarityQueryAppender extends PromiseSimilarityQuery
 
     //region PromiseSimilarityQueryAppenderBase Implementation
     @Override
-    public boolean canAppend(PromiseBulkInput input) {
+    public boolean canAppend(PromiseSimilarityBulkInput input) {
         return Seq.seq(input.getBulkIdPromises()).isNotEmpty() ||
                 Seq.seq(input.getBulkTraversalPromises()).isNotEmpty();
     }
 
     @Override
-    public boolean append(PromiseBulkInput input) {
+    public boolean append(PromiseSimilarityBulkInput input) {
         Iterable<GraphVertexSchema> vertexSchemas = Seq.seq(this.getSchemaProvider().getVertexTypes())
                 .map(vertexType -> this.getSchemaProvider().getVertexSchema(vertexType))
                 .filter(optional -> optional.isPresent())

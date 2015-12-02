@@ -105,6 +105,13 @@ public class PromiseControllerManager extends BasicControllerManager {
                                 new DualEdgeConverter(graph, this.schemaProvider, elasticMutations, lazyGetterFactory))),
                 elasticMutations,
                 new PromiseEdgeConverter(graph));
+
+        this.similarityEdgeController = new PromiseSimilarityEdgeController(
+                graph,
+                this.schemaProvider,
+                this.client,
+                elasticMutations,
+                elasticConfiguration);
     }
 
     @Override

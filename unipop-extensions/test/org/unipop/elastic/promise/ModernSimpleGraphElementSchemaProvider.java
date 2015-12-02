@@ -1,6 +1,7 @@
 package org.unipop.elastic.promise;
 
 import org.unipop.elastic.controller.promise.schemaProviders.GraphPromiseEdgeSchema;
+import org.unipop.elastic.controller.promise.schemaProviders.GraphPromiseVertexSchema;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.*;
 
 import java.util.Arrays;
@@ -24,6 +25,7 @@ public class ModernSimpleGraphElementSchemaProvider implements GraphElementSchem
         switch (type) {
             case "person": return Optional.of(getPersonVertexSchema());
             case "software": return Optional.of(getSoftwareVertexSchema());
+            case "promise": return Optional.of(getPromiseVertexSchema());
             default: return null;
         }
     }
@@ -87,6 +89,35 @@ public class ModernSimpleGraphElementSchemaProvider implements GraphElementSchem
     //endregion
 
     //region Private Methods
+    public GraphPromiseVertexSchema getPromiseVertexSchema() {
+        return new GraphPromiseVertexSchema() {
+            @Override
+            public PromiseSimilarity getSimilarity() {
+                return new PromiseSimilarity() {
+                    @Override
+                    public Iterable<String> getSimilarityProperties() {
+                        return Arrays.asList("name", "lang", "age");
+                    }
+                };
+            }
+
+            @Override
+            public String getType() {
+                return "promise";
+            }
+
+            @Override
+            public Optional<GraphElementRouting> getRouting() {
+                return Optional.empty();
+            }
+
+            @Override
+            public Iterable<String> getIndices() {
+                return Collections.emptyList();
+            }
+        };
+    }
+
     public GraphVertexSchema getPersonVertexSchema() {
         return new GraphVertexSchema() {
             @Override

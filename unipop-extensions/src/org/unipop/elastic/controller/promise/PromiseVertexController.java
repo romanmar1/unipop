@@ -5,6 +5,8 @@ import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Element;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.T;
 import org.unipop.elastic.controller.Predicates;
 import org.unipop.elastic.controller.VertexController;
 import org.unipop.elastic.controller.schema.helpers.HasContainersQueryTranslator;
@@ -37,7 +39,8 @@ public class PromiseVertexController implements VertexController {
     //region VertexController Implementation
     @Override
     public Iterator<BaseVertex> vertices(Predicates predicates) {
-        if (predicates.hasContainers == null || predicates.hasContainers.size() == 0) {
+        if (predicates.hasContainers == null || predicates.hasContainers.size() == 0 ||
+                (predicates.hasContainers.size() == 1 && predicates.hasContainers.get(0).getKey() == T.id.getAccessor())) {
             // promise all vertices
             return StreamSupport.stream(Spliterators.spliteratorUnknownSize(innerVertexController.vertices(predicates), 0), false)
                     .flatMap(vertex -> StreamSupport.stream(this.elementConverter.convert(vertex).spliterator(), false))

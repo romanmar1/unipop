@@ -12,7 +12,7 @@ import org.unipop.elastic.controller.promise.TraversalPromise;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.*;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.dual.*;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.*;
-import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.provider.TraversalConcatIdProvider;
+import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.provider.TraversalConcatKeyIdProvider;
 import org.unipop.elastic.controller.schema.helpers.SearchBuilder;
 import org.unipop.elastic.controller.schema.helpers.queryAppenders.CompositeQueryAppender;
 import org.unipop.elastic.controller.schema.helpers.queryAppenders.QueryAppender;
@@ -30,7 +30,7 @@ public class PromiseAppenderTest {
     @Before
     public void setup() {
         QueryBuilderFactory<TraversalPromiseEdgeInput> traversalPromiseQueryBuilderFactory = new CachedTraversalPromiseEdgeQueryBuilderFactory<>(
-                new TraversalPromiseEdgeQueryBuilderFactory(new TraversalConcatIdProvider())
+                new TraversalPromiseEdgeQueryBuilderFactory(new TraversalConcatKeyIdProvider())
         );
 
         QueryBuilderFactory<IdPromiseSchemaInput<GraphEdgeSchema>> idPromiseQueryBuilderFactory = new IdPromiseEdgeQueryBuilderFactory();

@@ -4,6 +4,7 @@ import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.jooq.lambda.Seq;
 import org.unipop.elastic.controller.promise.helpers.PromiseStringConstants;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.PromiseBulkInput;
+import org.unipop.elastic.controller.promise.helpers.queryAppenders.PromiseSimilarityBulkInput;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.structure.UniGraph;
 
@@ -21,12 +22,12 @@ public class PromiseTypesSimilarityQueryAppender extends PromiseSimilarityQueryA
 
     //region PromiseSimilarityQueryAppenderBase Implementation
     @Override
-    public boolean canAppend(PromiseBulkInput input) {
+    public boolean canAppend(PromiseSimilarityBulkInput input) {
         return Seq.seq(this.getSchemaProvider().getVertexTypes()).isNotEmpty();
     }
 
     @Override
-    public boolean append(PromiseBulkInput input) {
+    public boolean append(PromiseSimilarityBulkInput input) {
         if (canAppend(input)) {
             input.getSearchBuilder().getQueryBuilder().seekRoot().query().filtered().filter()
                     .bool(PromiseStringConstants.PROMISES_TYPES_DIRECTIONS_FILTER).must()

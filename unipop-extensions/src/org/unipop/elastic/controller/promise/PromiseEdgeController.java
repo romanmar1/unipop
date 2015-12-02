@@ -14,7 +14,7 @@ import org.unipop.elastic.controller.promise.helpers.elementConverters.map.*;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.*;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.dual.*;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.factory.*;
-import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.provider.TraversalConcatIdProvider;
+import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.provider.TraversalConcatKeyIdProvider;
 import org.unipop.elastic.controller.promise.schemaProviders.GraphPromiseEdgeSchema;
 import org.unipop.elastic.controller.schema.helpers.*;
 import org.unipop.elastic.controller.schema.helpers.aggregationConverters.CompositeAggregation;
@@ -321,7 +321,7 @@ public class PromiseEdgeController implements EdgeController {
 
     private QueryAppender<PromiseBulkInput> getQueryAppender(Direction direction) {
         QueryBuilderFactory<TraversalPromiseEdgeInput> traversalPromiseQueryBuilderFactory = new CachedTraversalPromiseEdgeQueryBuilderFactory<>(
-                new TraversalPromiseEdgeQueryBuilderFactory(new TraversalConcatIdProvider())
+                new TraversalPromiseEdgeQueryBuilderFactory(new TraversalConcatKeyIdProvider())
         );
 
         QueryBuilderFactory<IdPromiseSchemaInput<GraphEdgeSchema>> idPromiseQueryBuilderFactory = new IdPromiseEdgeQueryBuilderFactory();
