@@ -10,13 +10,16 @@ public class TraversalPromise implements Promise{
     public TraversalPromise(Object id, Traversal traversal) {
         this.id = id;
         this.traversal = traversal;
+        this.setIsStrongId(true);
     }
     //endregion
 
     //region Override Methods
     @Override
     public TraversalPromise clone() throws CloneNotSupportedException {
-        return new TraversalPromise(this.id, this.traversal.asAdmin().clone());
+        TraversalPromise clone = new TraversalPromise(this.id, this.traversal.asAdmin().clone());
+        clone.setIsStrongId(this.isStrongId);
+        return clone;
     }
     //endregion
 
@@ -30,10 +33,19 @@ public class TraversalPromise implements Promise{
     public Traversal getTraversal() {
         return traversal;
     }
+
+    public boolean getIsStrongId() {
+        return this.isStrongId;
+    }
+
+    public void setIsStrongId(boolean value) {
+        this.isStrongId = value;
+    }
     //endregion
 
     //region fields
     private Object id;
     private Traversal traversal;
+    private boolean isStrongId;
     //endregion
 }

@@ -38,8 +38,9 @@ public class PromiseFilterSimilarityQueryAppender extends PromiseSimilarityQuery
     //region PromiseSimilarityQueryAppenderBase Implementation
     @Override
     public boolean canAppend(PromiseSimilarityBulkInput input) {
-        return Seq.seq(input.getBulkIdPromises()).isNotEmpty() ||
-                Seq.seq(input.getBulkTraversalPromises()).isNotEmpty();
+        return this.getGraphPromiseVertexSchema().isPresent() &&
+                (Seq.seq(input.getBulkIdPromises()).isNotEmpty() ||
+                Seq.seq(input.getBulkTraversalPromises()).isNotEmpty());
     }
 
     @Override

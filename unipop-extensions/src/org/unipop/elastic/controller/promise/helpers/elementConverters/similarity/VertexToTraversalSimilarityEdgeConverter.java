@@ -14,6 +14,7 @@ import org.unipop.elastic.controller.promise.PromiseVertex;
 import org.unipop.elastic.controller.promise.TraversalPromise;
 import org.unipop.elastic.controller.promise.helpers.queryAppenders.helpers.provider.TraversalIdProvider;
 import org.unipop.elastic.controller.schema.helpers.elementConverters.ElementConverter;
+import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
 import org.unipop.structure.UniGraph;
 
 import java.util.ArrayList;
@@ -21,12 +22,14 @@ import java.util.ArrayList;
 /**
  * Created by Roman on 12/1/2015.
  */
-public class VertexToTraversalSimilarityEdgeConverter implements ElementConverter<Element, Element> {
+public class VertexToTraversalSimilarityEdgeConverter extends GraphPromiseSimilarityEdgeConverterBase<Element> {
     //region Constructor
-    public VertexToTraversalSimilarityEdgeConverter(UniGraph graph, Direction direction, TraversalIdProvider<String> traversalIdProvider) {
-        this.graph = graph;
-        this.direction = direction;
-        this.traversalIdProvider = traversalIdProvider;
+    public VertexToTraversalSimilarityEdgeConverter(
+            UniGraph graph,
+            Direction direction,
+            GraphElementSchemaProvider schemaProvider,
+            TraversalIdProvider<String> traversalIdProvider) {
+        super(graph, direction, schemaProvider, traversalIdProvider);
     }
     //endregion
 
@@ -64,18 +67,12 @@ public class VertexToTraversalSimilarityEdgeConverter implements ElementConverte
     protected PromiseVertex buildTraversalPromiseVertex(Element element) {
         Traversal[] propertyTraversals = Seq.seq(element.properties()).map(property -> __.has(property.key(), P.eq(property.value()))).toArray(Traversal<?, ?>[]::new);
         Traversal traversal = __.or(propertyTraversals);
-        PromiseVertex promiseVertex = new PromiseVertex(new TraversalPromise(traversalIdProvider.getId(traversal), traversal), this.graph);
+
+        TraversalPromise traversalPromise = new TraversalPromise(traversalIdProvider.getId(traversal), traversal);
+        traversalPromise.setIsStrongId(false);
+
+        PromiseVertex promiseVertex = new PromiseVertex(traversalPromise, this.graph);
         return promiseVertex;
     }
-
-    protected String getEdgeId(Vertex outVertex, Vertex inVertex) {
-        return Integer.toHexString(outVertex.id().hashCode()) + Integer.toHexString(inVertex.id().hashCode());
-    }
-    //endregion
-
-    //region Fields
-    protected UniGraph graph;
-    protected Direction direction;
-    protected TraversalIdProvider<String> traversalIdProvider;
     //endregion
 }
