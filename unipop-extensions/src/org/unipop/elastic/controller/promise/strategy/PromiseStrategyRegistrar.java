@@ -4,16 +4,13 @@ import org.apache.tinkerpop.gremlin.process.traversal.TraversalStrategies;
 import org.apache.tinkerpop.gremlin.process.traversal.util.DefaultTraversalStrategies;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.unipop.elastic.controller.schema.helpers.schemaProviders.GraphElementSchemaProvider;
-import org.unipop.process.strategy.BasicStrategyRegistrar;
-import org.unipop.process.strategy.UniGraphPredicatesStrategy;
-import org.unipop.process.strategy.UniGraphStartStepStrategy;
-import org.unipop.process.strategy.UniGraphVertexStepStrategy;
+import org.unipop.process.strategy.*;
 import org.unipop.structure.UniGraph;
 
 /**
  * Created by Karni on 11/27/2015.
  */
-public class PromiseStrategyRegistrar extends BasicStrategyRegistrar {
+public class PromiseStrategyRegistrar implements StrategyRegistrar {
     //region Constructor
     public PromiseStrategyRegistrar(GraphElementSchemaProvider schemaProvider) {
         this.schemaProvider = schemaProvider;
